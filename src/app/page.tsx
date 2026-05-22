@@ -32,7 +32,7 @@ import {
 const FEATURED_BOOKS = [
   {
     id: 1,
-    title: "The Dustbin Diaried",
+    title: "The Dustbin Diaries",
     author: "Dr. Alok Gupta",
     genre: "Noval",
     desc: "",
