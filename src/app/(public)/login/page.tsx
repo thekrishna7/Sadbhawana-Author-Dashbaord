@@ -7,7 +7,9 @@ import { createClient } from "@/lib/supabase/client";
 import { Loader2, Lock, Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
 
-export default function LoginPage() {
+import { Suspense } from "react";
+
+function LoginPageContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const [email, setEmail] = useState("");
@@ -188,5 +190,17 @@ export default function LoginPage() {
         </div>
       </motion.div>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense fallback={
+      <div className="ambient-bg min-h-screen flex flex-col items-center justify-center p-6 relative overflow-hidden">
+        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+      </div>
+    }>
+      <LoginPageContent />
+    </Suspense>
   );
 }
