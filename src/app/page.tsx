@@ -32,31 +32,31 @@ import {
 const FEATURED_BOOKS = [
   {
     id: 1,
-    title: "The Ethereal Echo",
-    author: "K. R. Varma",
-    genre: "Philosophical Fiction",
-    desc: "An exploration of human consciousness and memory fragments, bound in a matte dark cover with velvet texture.",
-    image: "/book1.png",
+    title: "The Dustbin Diaried",
+    author: "Dr. Alok Gupta",
+    genre: "Noval",
+    desc: "",
+    image: "/book1.jpg",
     accent: "from-violet-500/20 to-zinc-500/10",
     color: "rgba(139, 92, 246, 0.4)",
   },
   {
     id: 2,
-    title: "Shadow of Silver",
-    author: "Elena Thorne",
-    genre: "Dark Fantasy",
-    desc: "A tale of old magic, silvered paths, and kingdoms lost, bound in custom emerald leather with silver filigree.",
+    title: "Unforgettable Memories",
+    author: "Dr. Raj Kishor Tewari",
+    genre: "Memorable",
+    desc: "",
     image: "/book2.png",
     accent: "from-emerald-500/20 to-zinc-500/10",
     color: "rgba(16, 185, 129, 0.4)",
   },
   {
     id: 3,
-    title: "Prism of Gold",
-    author: "Devashish Sen",
-    genre: "Modern Poetry",
-    desc: "An anthology of verses capturing love, loss, and the golden hours of youth, bound in royal blue fabric with gold leaf accents.",
-    image: "/book3.png",
+    title: "Fundamental Features of Microsoft Word",
+    author: "Krishna Sharmah",
+    genre: "Education",
+    desc: "",
+    image: "/book3.jpg",
     accent: "from-amber-500/20 to-zinc-500/10",
     color: "rgba(245, 158, 11, 0.4)",
   },
@@ -186,7 +186,7 @@ export default function HomePage() {
   const printingCost = calculatePrintingCost();
   const distributionFee = Math.round(retailPrice * 0.4); // 40% distribution cut
   const netMargin = Math.max(0, retailPrice - printingCost - distributionFee);
-  
+
   // 70% author royalty split
   const royaltySplit = 0.70;
   const authorEarningsPerBook = netMargin * royaltySplit;
@@ -219,25 +219,19 @@ export default function HomePage() {
           <div className="flex flex-col">
             <Link href="/" className="flex items-center gap-2 group">
               <span className="text-xl font-black tracking-wider text-gradient font-serif">
-                SADBHAWANA
+                SADBHAWANA PUBLICATION
               </span>
             </Link>
             <span className="text-[9px] font-bold tracking-[0.25em] text-amber-500/80 uppercase pl-0.5">
-              Luxury Publishing Ecosystem
+
             </span>
           </div>
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-8">
             {[
-              { label: "Home", href: "#home" },
-              { label: "About", href: "#about" },
-              { label: "Services", href: "#services" },
-              { label: "Book Store", href: "#bookstore" },
-              { label: "Calculator", href: "#calculator" },
-              { label: "Packages", href: "#packages" },
-              { label: "Gallery", href: "#gallery" },
-              { label: "Contact", href: "#contact" },
+              { label: "Home", href: "https://www.sadbhawanapublication.com/" },
+
             ].map((link) => (
               <a
                 key={link.label}
@@ -599,20 +593,18 @@ export default function HomePage() {
                 <button
                   key={book.id}
                   onClick={() => setSelectedBook(book)}
-                  className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between ${
-                    selectedBook.id === book.id
-                      ? "bg-white/5 border-white/20 glow-violet shadow-xl"
-                      : "bg-transparent border-white/5 hover:bg-white/2"
-                  }`}
+                  className={`w-full text-left p-5 rounded-2xl border transition-all duration-300 flex items-center justify-between ${selectedBook.id === book.id
+                    ? "bg-white/5 border-white/20 glow-violet shadow-xl"
+                    : "bg-transparent border-white/5 hover:bg-white/2"
+                    }`}
                 >
                   <div>
                     <h3 className="font-bold text-white text-base">{book.title}</h3>
                     <p className="text-xs text-zinc-500 font-medium">{book.author} — <span className="text-amber-500/80">{book.genre}</span></p>
                   </div>
                   <ChevronRight
-                    className={`h-5 w-5 text-zinc-500 transition-transform ${
-                      selectedBook.id === book.id ? "rotate-90 text-violet-400" : ""
-                    }`}
+                    className={`h-5 w-5 text-zinc-500 transition-transform ${selectedBook.id === book.id ? "rotate-90 text-violet-400" : ""
+                      }`}
                   />
                 </button>
               ))}
@@ -756,11 +748,10 @@ export default function HomePage() {
                   <button
                     key={item.id}
                     onClick={() => setFormat(item.id as any)}
-                    className={`py-3 rounded-2xl font-bold text-xs uppercase tracking-wider border transition-all duration-200 ${
-                      format === item.id
-                        ? "bg-violet-600 border-violet-500 text-white glow-violet"
-                        : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/8"
-                    }`}
+                    className={`py-3 rounded-2xl font-bold text-xs uppercase tracking-wider border transition-all duration-200 ${format === item.id
+                      ? "bg-violet-600 border-violet-500 text-white glow-violet"
+                      : "bg-white/5 border-white/5 text-zinc-400 hover:bg-white/8"
+                      }`}
                   >
                     {item.label}
                   </button>
@@ -775,7 +766,7 @@ export default function HomePage() {
 
             <div className="space-y-6 relative z-10">
               <h3 className="text-xl font-bold text-white">Projected Earnings</h3>
-              
+
               {/* Financial metrics list */}
               <div className="space-y-4 pt-4">
                 <div className="flex justify-between text-sm py-2 border-b border-white/5">
@@ -863,60 +854,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PACKAGES SECTION */}
-      <section id="packages" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-violet-400">Publishing Packages</p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white font-serif">
-            Tailored To Your Vision
-          </h2>
-          <p className="text-sm md:text-base text-zinc-500">
-            Compare our curated publishing packages. Designed for debut creators and enterprise brands alike.
-          </p>
-        </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {PACKAGES.map((pkg) => (
-            <div
-              key={pkg.name}
-              className={`p-8 rounded-[32px] border flex flex-col justify-between transition-all duration-300 relative ${pkg.accent}`}
-            >
-              {pkg.badge && (
-                <span className="absolute top-4 right-4 bg-gradient-to-r from-violet-600 to-purple-600 text-white font-bold text-[9px] uppercase tracking-widest px-3 py-1 rounded-full border border-violet-500/40">
-                  {pkg.badge}
-                </span>
-              )}
-              <div className="space-y-6">
-                <div>
-                  <h3 className="text-xl font-bold text-white">{pkg.name}</h3>
-                  <p className="text-zinc-500 text-xs mt-1 min-h-[32px]">{pkg.desc}</p>
-                </div>
-                <div className="flex items-baseline gap-1">
-                  <span className="text-3xl font-black text-white">{pkg.price}</span>
-                  <span className="text-zinc-500 text-xs">/ package</span>
-                </div>
-                <hr className="border-white/5" />
-                <ul className="space-y-3">
-                  {pkg.features.map((feature) => (
-                    <li key={feature} className="flex items-start gap-3 text-xs text-zinc-400 font-medium">
-                      <Check className="h-4 w-4 text-violet-400 shrink-0 mt-0.5" />
-                      <span>{feature}</span>
-                    </li>
-                  ))}
-                </ul>
-              </div>
-              <div className="pt-8">
-                <a
-                  href="#contact"
-                  className="block w-full py-4 text-center rounded-2xl bg-white/5 border border-white/10 text-white hover:bg-white/10 hover:text-white font-bold text-xs uppercase tracking-wider transition-colors duration-200"
-                >
-                  Choose {pkg.name}
-                </a>
-              </div>
-            </div>
-          ))}
-        </div>
-      </section>
 
       {/* AUTHOR DASHBOARD EXPERIENCE SHOWCASE */}
       <section className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5 relative overflow-hidden">
@@ -985,52 +923,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* PRINTING GALLERY */}
-      <section id="gallery" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
-        <div className="text-center max-w-2xl mx-auto space-y-4 mb-16">
-          <p className="text-xs font-bold uppercase tracking-[0.25em] text-violet-400">Craft Gallery</p>
-          <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white font-serif">
-            Physical Craft Excellence
-          </h2>
-          <p className="text-sm md:text-base text-zinc-500">
-            A visual overview of our luxury covers, paper materials, binding textures, and custom prints.
-          </p>
-        </div>
 
-        {/* Gallery Grid */}
-        <div className="grid grid-cols-2 md:grid-cols-3 gap-6">
-          {[
-            { img: "/book1.png", title: "Velvet Matte Finish", desc: "Anti-scratch matte covers with premium gold foil stamping." },
-            { img: "/book2.png", title: "Emerald Leatherette Binding", desc: "Bound in leather textures with silver embossed highlights." },
-            { img: "/book3.png", title: "Royal Fabric Binding", desc: "Linen cloth wrapped hardcover with custom dust-jacket wraps." },
-            { img: "/dashboard.png", title: "Global Roster Interface", desc: "Modern author analytics workspace designed for fast reporting." },
-            { img: "/book1.png", title: "Custom Layout Formatting", desc: "Handcrafted typography grids customized for reader comfort." },
-            { img: "/book2.png", title: "Fine Art Proofing", desc: "High fidelity prints on acid-free premium cream paper." },
-          ].map((item, index) => (
-            <motion.div
-              key={index}
-              initial={{ opacity: 0, scale: 0.95 }}
-              whileInView={{ opacity: 1, scale: 1 }}
-              viewport={{ once: true }}
-              transition={{ duration: 0.5, delay: index * 0.05 }}
-              className="glass rounded-3xl border border-white/5 overflow-hidden group cursor-pointer"
-            >
-              <div className="aspect-[4/3] overflow-hidden relative">
-                <Image
-                  src={item.img}
-                  alt={item.title}
-                  fill
-                  className="object-cover group-hover:scale-105 transition-transform duration-500"
-                />
-                <div className="absolute inset-0 bg-gradient-to-t from-black/85 via-black/20 to-transparent opacity-0 group-hover:opacity-100 transition-opacity duration-300 p-6 flex flex-col justify-end">
-                  <h3 className="text-sm font-bold text-white">{item.title}</h3>
-                  <p className="text-xs text-zinc-400 mt-1 font-medium">{item.desc}</p>
-                </div>
-              </div>
-            </motion.div>
-          ))}
-        </div>
-      </section>
 
       {/* CONTACT SECTION / SUBMISSION FORM */}
       <section id="contact" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5">
@@ -1054,7 +947,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500 font-semibold uppercase">Email HQ</p>
-                  <p className="text-sm font-semibold text-white">submissions@sadbhawana.com</p>
+                  <p className="text-sm font-semibold text-white">sadbhawanapublication@gmail.com</p>
                 </div>
               </div>
 
@@ -1064,7 +957,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500 font-semibold uppercase">Phone Support</p>
-                  <p className="text-sm font-semibold text-white">+91 98765 43210</p>
+                  <p className="text-sm font-semibold text-white">+91 7987484155 / +91 8109065947</p>
                 </div>
               </div>
 
@@ -1074,7 +967,7 @@ export default function HomePage() {
                 </div>
                 <div>
                   <p className="text-xs text-zinc-500 font-semibold uppercase">HQ Office</p>
-                  <p className="text-sm font-semibold text-white">Sadbhawana Tower, Sector 62, Noida, India</p>
+                  <p className="text-sm font-semibold text-white">Near, Rajiv Gandhi School Ambah Morena (M.P.), India - 476111</p>
                 </div>
               </div>
             </div>
@@ -1189,9 +1082,8 @@ export default function HomePage() {
           {/* Brand Info */}
           <div className="space-y-4">
             <div className="flex flex-col">
-              <span className="text-lg font-black tracking-wider text-gradient font-serif">SADBHAWANA</span>
+              <span className="text-lg font-black tracking-wider text-gradient font-serif">SADBHAWANA PUBLICATION</span>
               <span className="text-[8px] font-bold tracking-[0.2em] text-amber-500/80 uppercase">
-                Luxury Publishing Ecosystem
               </span>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed font-normal">

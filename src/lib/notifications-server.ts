@@ -1,6 +1,21 @@
 import { createAdminClient } from "./supabase/admin";
 import { promises as fs } from "fs";
 import path from "path";
+import nodemailer from "nodemailer";
+
+// Initialize Gmail SMTP transporter
+const smtpEmail = process.env.SMTP_EMAIL || "krishnasharmaambah961u@gmail.com";
+const smtpPassword = process.env.SMTP_PASSWORD || "syoz crim pzlb dqmf";
+
+const transporter = nodemailer.createTransport({
+  host: "smtp.gmail.com",
+  port: 587,
+  secure: false, // port 587 uses STARTTLS, secure:false is required for this port
+  auth: {
+    user: smtpEmail,
+    pass: smtpPassword,
+  },
+});
 
 export async function triggerNotification(params: {
   userIds: string[];
@@ -43,7 +58,6 @@ export async function triggerNotification(params: {
   }
 
   // 3. For each profile, send email
-  const resendApiKey = process.env.RESEND_API_KEY;
   const emailsSent: any[] = [];
   const sentEmails = new Set<string>();
 
@@ -71,7 +85,7 @@ export async function triggerNotification(params: {
     });
 
     const emailPayload = {
-      from: "Sadbhawana Publication <onboarding@resend.dev>", // Fallback onboarding address
+      from: `"Sadbhawana Publication" <${smtpEmail}>`,
       to: recipientEmail,
       subject: `[Sadbhawana OS] ${title}`,
       html: htmlContent,
@@ -80,28 +94,13 @@ export async function triggerNotification(params: {
     let sent = false;
     let errorMsg = null;
 
-    if (resendApiKey && resendApiKey !== "placeholder" && !resendApiKey.startsWith("YOUR_")) {
-      try {
-        const response = await fetch("https://api.resend.com/emails", {
-          method: "POST",
-          headers: {
-            "Authorization": `Bearer ${resendApiKey}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify(emailPayload),
-        });
-
-        if (response.ok) {
-          sent = true;
-        } else {
-          const errData = await response.json();
-          errorMsg = JSON.stringify(errData);
-          console.error(`Resend API failed for ${recipientEmail}:`, errData);
-        }
-      } catch (err: any) {
-        errorMsg = err?.message || "Network error";
-        console.error(`Resend send exception for ${recipientEmail}:`, err);
-      }
+    try {
+      const info = await transporter.sendMail(emailPayload);
+      sent = true;
+      console.log(`[SMTP success] Email successfully sent to ${recipientEmail} (MsgID: ${info.messageId})`);
+    } catch (err: any) {
+      errorMsg = err?.message || "SMTP error";
+      console.error(`[SMTP failure] SMTP send error for ${recipientEmail}:`, err);
     }
 
     // Always log or write to simulated mailbox if Resend failed or is unconfigured
