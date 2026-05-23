@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { MetricCard } from "@/components/ui/metric-card";
@@ -45,15 +45,15 @@ export function AdminDashboardClient({
     <DashboardShell
       nav={ADMIN_NAV}
       profile={profile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title="Overview"
       subtitle="Real-time publishing operations at HQ"
     >
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         <MetricCard label="Total Authors" value={stats.authors} icon={Users} trend="+ Live" />
         <MetricCard label="Active Books" value={stats.books} icon={BookOpen} />
-        <MetricCard label="Revenue" value={stats.revenue} prefix="₹" icon={DollarSign} />
-        <MetricCard label="Royalties Paid" value={stats.royaltiesPaid} prefix="₹" icon={Wallet} />
+        <MetricCard label="Revenue" value={stats.revenue} prefix="â‚¹" icon={DollarSign} />
+        <MetricCard label="Royalties Paid" value={stats.royaltiesPaid} prefix="â‚¹" icon={Wallet} />
         <MetricCard label="Pending Reviews" value={stats.pendingReviews} icon={Clock} />
         <MetricCard label="Active Projects" value={stats.activeProjects} icon={GitBranch} />
       </div>
@@ -95,7 +95,7 @@ export function AdminDashboardClient({
           <div className="flex items-center justify-between mb-8">
             <h3 className="text-2xl font-semibold text-white">Live activity</h3>
             <Link href="/admin/pipeline" className="text-sm text-violet-400 hover:text-violet-300">
-              View pipeline →
+              View pipeline â†’
             </Link>
           </div>
           <ul className="space-y-4 max-h-72 overflow-y-auto">
@@ -113,7 +113,7 @@ export function AdminDashboardClient({
                       {a.action.replace(/_/g, " ")}
                     </p>
                     <p className="text-xs text-zinc-500">
-                      {a.user_name ?? "System"} ·{" "}
+                      {a.user_name ?? "System"} Â·{" "}
                       {new Date(a.created_at).toLocaleString()}
                     </p>
                   </div>
@@ -126,3 +126,4 @@ export function AdminDashboardClient({
     </DashboardShell>
   );
 }
+

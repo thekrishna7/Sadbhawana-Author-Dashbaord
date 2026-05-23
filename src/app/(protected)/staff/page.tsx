@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -33,7 +33,7 @@ export default function StaffDashboardPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Ops" title="Dashboard" subtitle="Your assigned publishing projects">
+    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Workspace" title="Dashboard" subtitle="Your assigned publishing projects">
       <div className="grid gap-6 md:grid-cols-2">
         {books.map((book) => (
           <Link key={book.id} href={`/staff/books/${book.id}`}>
@@ -50,3 +50,4 @@ export default function StaffDashboardPage() {
     </DashboardShell>
   );
 }
+

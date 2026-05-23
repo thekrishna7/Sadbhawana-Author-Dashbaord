@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -27,7 +27,7 @@ export default function AdminDocumentsPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control" title="Documents" subtitle="Agreements, ISBN, contracts">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Documents" subtitle="Agreements, ISBN, contracts">
       <div className="grid gap-4">
         {docs.map((d) => (
           <GlassCard key={d.id} className="flex justify-between p-6!" hover={false}>
@@ -42,3 +42,4 @@ export default function AdminDocumentsPage() {
     </DashboardShell>
   );
 }
+

@@ -26,6 +26,7 @@ import {
   BookOpenCheck,
   CheckCircle,
   FileText,
+  Users,
 } from "lucide-react";
 
 // Featured books mock metadata
@@ -62,106 +63,61 @@ const FEATURED_BOOKS = [
   },
 ];
 
-// Publishing Packages
-const PACKAGES = [
-  {
-    name: "Classic",
-    price: "₹49,999",
-    desc: "Perfect for debut authors who want high-quality standard publishing and global digital reach.",
-    features: [
-      "Professional Copyediting",
-      "Custom Softcover design",
-      "ISBN & Copyright registration",
-      "E-book & Paperback formats",
-      "Global distribution (Amazon, Flipkart)",
-      "Standard Royalty Split",
-      "Author Dashboard basic access",
-    ],
-    accent: "border-white/5 bg-white/2 hover:border-white/10",
-    badge: null,
-  },
-  {
-    name: "Premium Elite",
-    price: "₹99,999",
-    desc: "Designed for serious writers seeking premium marketing campaigns and custom production elements.",
-    features: [
-      "Comprehensive Line Editing",
-      "Deluxe Matte Hardcover + Softcover",
-      "ISBN, Copyright & Barcode setup",
-      "Audiobook conversion ready",
-      "Global distribution + Retail pitching",
-      "Advanced Amazon SEO & Marketing (1 mo)",
-      "75% Author Royalty Split",
-      "Author Dashboard & Analytics access",
-      "Press Release release & media kits",
-    ],
-    accent: "border-violet-500/30 bg-violet-950/5 hover:border-violet-500/50 glow-violet",
-    badge: "Recommended",
-  },
-  {
-    name: "Signature Luxury",
-    price: "₹1,89,999",
-    desc: "The ultimate author-to-brand transformation. Custom leather bindings, premium PR, and personal branding.",
-    features: [
-      "Developmental & Line Editing",
-      "Custom Leather/Fabric cover with Foil accent",
-      "E-Book, Hardcover & Audio book formats",
-      "Worldwide retail distribution & representation",
-      "Exclusive Author Website development",
-      "Influencer Outreach & Virtual Book Tour",
-      "85% Author Royalty Split (Highest in industry)",
-      "Real-time Dashboard & Direct Slack Support",
-      "National media coverage & launch press release",
-      "Cinematic Book Trailer production",
-    ],
-    accent: "border-amber-500/20 bg-amber-950/5 hover:border-amber-500/40 glow-gold",
-    badge: "Elite Brand Ecosystem",
-  },
-];
-
 // Services
 const SERVICES = [
   {
-    title: "Book Publishing",
-    desc: "End-to-end luxury book printing, binding, formatting, and publication management.",
-    icon: BookOpenCheck,
+    title: "Editorial Services",
+    desc: "Rigorous proofreading, line-editing, and formatting from experienced editors to ensure literary polish.",
+    icon: FileText,
     color: "group-hover:text-violet-400 bg-violet-500/10 text-violet-400",
   },
   {
-    title: "Editorial & Editing",
-    desc: "Rigorous proofreading, line-editing, and developmental critiques from industry experts.",
-    icon: FileText,
+    title: "Designing Services",
+    desc: "Exquisite and professional custom book cover designs and layout architecture tailored to your genre.",
+    icon: Sparkles,
     color: "group-hover:text-amber-400 bg-amber-500/10 text-amber-400",
   },
   {
-    title: "Exquisite Cover Design",
-    desc: "Custom award-winning illustrations, typography, and premium dust-jacket designs.",
-    icon: Sparkles,
+    title: "Marketing Services",
+    desc: "Author branding, poetry conferences, seminars, social media campaigns, and promotional video clip creation.",
+    icon: PenLine,
     color: "group-hover:text-emerald-400 bg-emerald-500/10 text-emerald-400",
   },
   {
-    title: "ISBN & Copyright Guard",
-    desc: "Complete registration, legal filings, cataloging-in-publication, and rights management.",
-    icon: Shield,
+    title: "Distribution Services",
+    desc: "Global reach and listing across prime online marketplaces including Amazon, Flipkart, and physical outlets.",
+    icon: Globe,
     color: "group-hover:text-rose-400 bg-rose-500/10 text-rose-400",
   },
   {
-    title: "Global Distribution",
-    desc: "Reach readers worldwide through Amazon, Flipkart, IngramSpark, and offline bookstores.",
-    icon: Globe,
+    title: "Author Support",
+    desc: "End-to-end guidance for new writers, professors, and educators to guide them step-by-step through the process.",
+    icon: Users,
     color: "group-hover:text-blue-400 bg-blue-500/10 text-blue-400",
   },
   {
-    title: "Strategic Marketing",
-    desc: "Targeted digital advertising, review campaigns, social media growth, and bestseller push.",
-    icon: Coins,
+    title: "Legal Services & Copyright",
+    desc: "Complete registration of copyright, barcoding, legal paperwork, and protection of intellectual property.",
+    icon: Shield,
     color: "group-hover:text-purple-400 bg-purple-500/10 text-purple-400",
   },
   {
-    title: "Author Branding",
-    desc: "Complete PR campaigns, website creation, media kits, and brand partnerships.",
-    icon: PenLine,
+    title: "ISBN Support",
+    desc: "Official allocation of international standard book numbers for your publication and records.",
+    icon: BookOpenCheck,
     color: "group-hover:text-pink-400 bg-pink-500/10 text-pink-400",
+  },
+  {
+    title: "Book Launch Support",
+    desc: "Promotional events, media coverage, virtual tours, and press releases to amplify your reach.",
+    icon: Award,
+    color: "group-hover:text-amber-500 bg-amber-500/10 text-amber-500",
+  },
+  {
+    title: "Author Dashboard",
+    desc: "A premium internal workflow portal to track production pipeline stages, royalty logs, and distribution.",
+    icon: Sliders,
+    color: "group-hover:text-violet-300 bg-violet-500/10 text-violet-300",
   },
 ];
 
@@ -216,22 +172,33 @@ export default function HomePage() {
       <header className="sticky top-0 z-50 w-full px-6 py-4 flex justify-center">
         <nav className="glass w-full max-w-7xl rounded-3xl px-6 py-4 flex items-center justify-between border border-white/5 shadow-2xl transition-all duration-300">
           {/* Logo Area */}
-          <div className="flex flex-col">
-            <Link href="/" className="flex items-center gap-2 group">
-              <span className="text-xl font-black tracking-wider text-gradient font-serif">
+          <Link href="/" className="flex items-center gap-3 group">
+            <Image
+              src="/logo.png"
+              alt="Sadbhawana Publication Logo"
+              width={42}
+              height={42}
+              className="object-contain filter drop-shadow-[0_0_8px_rgba(139,92,246,0.2)] group-hover:scale-105 transition-transform"
+            />
+            <div className="flex flex-col">
+              <span className="text-lg font-black tracking-wider text-gradient font-display leading-none">
                 SADBHAWANA PUBLICATION
               </span>
-            </Link>
-            <span className="text-[9px] font-bold tracking-[0.25em] text-amber-500/80 uppercase pl-0.5">
-
-            </span>
-          </div>
+              <span className="text-[8px] font-bold tracking-[0.2em] text-amber-500/80 uppercase mt-1">
+                Author Dashboard
+              </span>
+            </div>
+          </Link>
 
           {/* Desktop Navigation Links */}
           <div className="hidden lg:flex items-center gap-8">
             {[
-              { label: "Home", href: "https://www.sadbhawanapublication.com/" },
-
+              { label: "Home", href: "#home" },
+              { label: "About", href: "#about" },
+              { label: "Services", href: "#services" },
+              { label: "Book Store", href: "#bookstore" },
+              { label: "Calculator", href: "#calculator" },
+              { label: "Contact", href: "#contact" },
             ].map((link) => (
               <a
                 key={link.label}
@@ -345,8 +312,8 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.1 }}
               className="text-5xl md:text-7xl font-bold tracking-tight leading-tight text-gradient font-serif"
             >
-              Transforming <br className="hidden md:inline" />
-              Authors Into Brands
+              Sadbhawana <br className="hidden md:inline" />
+              Publication
             </motion.h1>
 
             <motion.p
@@ -355,7 +322,15 @@ export default function HomePage() {
               transition={{ duration: 0.7, delay: 0.2 }}
               className="text-lg md:text-xl text-zinc-400 font-normal max-w-xl mx-auto lg:mx-0"
             >
-              Premium publishing, distribution, branding, and author growth ecosystem. We print premium books and architect lifelong author careers.
+              “If you have even a little passion for Writing, then Sadbhawana Publication Ambah takes the responsibility of publishing your book.”
+            </motion.p>
+            <motion.p
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.7, delay: 0.25 }}
+              className="text-xs text-zinc-500 font-medium tracking-wide max-w-xl mx-auto lg:mx-0"
+            >
+              ISO 9001:2015 Certified & MSME Registered Indian book publishing company based in Ambah, Morena, Madhya Pradesh. Established in 2021.
             </motion.p>
 
             <motion.div
@@ -469,22 +444,27 @@ export default function HomePage() {
 
         <div className="grid lg:grid-cols-12 gap-16 items-center">
           <div className="lg:col-span-5 space-y-6">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-500">Our Vision</p>
-            <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white font-serif">
-              Crafting Legacies, <br />Not Just Pages.
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-500">Our Philosophy</p>
+            <h2 className="text-2xl md:text-4xl font-bold tracking-tight text-white font-serif leading-snug">
+              “Publishing is not our business, it is a hobby, literature is a service…”
             </h2>
-            <p className="text-zinc-400 leading-relaxed font-normal text-base">
-              At Sadbhawana Publication, we believe that every manuscript is a potential legacy. We have merged standard luxury book crafting with modern author technology.
-            </p>
-            <p className="text-zinc-400 leading-relaxed font-normal text-base">
-              From hand-crafted dust jackets and premium cotton bindings to real-time manuscript tracking, royalty distributions, and dynamic PR ecosystems, we empower authors to evolve from writers into globally recognizable brands.
-            </p>
+            <div className="space-y-4 text-zinc-400 leading-relaxed font-normal text-sm md:text-base">
+              <p className="italic border-l-2 border-amber-500 pl-4 py-1 text-zinc-300">
+                “This house and palace built by a person will be transferred to someone else’s name after his life, but the book written by you will remain yours for centuries after you. Like Godan still belongs to Premchand and will remain Premchand’s for centuries.”
+              </p>
+              <p>
+                Sadbhawana Publication is an ISO certified and MSME registered Indian book publishing company based in Ambah, Morena, Madhya Pradesh. Founded in 2021, under the direction of Reena Sharma and co-founded by Krishna Sharma, we have set out to provide reliable, guidance-driven, and affordable publishing for educators, professors, and creative writers across India.
+              </p>
+              <p>
+                By prioritizing transparency, trust, and women-led social leadership, we ensure that new authors receive the detailed guidance they need to make their mark on Indian literature and culture.
+              </p>
+            </div>
             <div className="pt-4">
               <a
                 href="#contact"
                 className="inline-flex items-center gap-2 text-sm font-bold text-amber-500 hover:text-amber-400 transition"
               >
-                Submit Your Manuscript <ArrowUpRight className="h-4 w-4" />
+                Connect With Our Team <ArrowUpRight className="h-4 w-4" />
               </a>
             </div>
           </div>
@@ -660,7 +640,7 @@ export default function HomePage() {
         </div>
       </section>
 
-      {/* ROYALTY & PACKAGES CALCULATOR */}
+      {/* ROYALTY CALCULATOR */}
       <section id="calculator" className="py-24 px-6 max-w-7xl mx-auto border-t border-white/5 relative">
         <div className="absolute top-0 right-1/4 w-96 h-96 bg-violet-600/5 rounded-full blur-[130px] pointer-events-none" />
 
@@ -670,7 +650,7 @@ export default function HomePage() {
             Interactive Royalty Calculator
           </h2>
           <p className="text-sm md:text-base text-zinc-500">
-            Slide the configurations dynamically to preview publishing costs, net margins, and estimated total author earnings.
+            Slide the configurations dynamically to preview printing costs, net margins, and estimated total author earnings. Books are printed using one of India’s top printing institutions: <strong>Thomson Press India Ltd.</strong>, ensuring exceptional print and paper quality.
           </p>
         </div>
 
@@ -863,20 +843,20 @@ export default function HomePage() {
 
         <div className="grid lg:grid-cols-12 gap-16 items-center relative z-10">
           <div className="lg:col-span-5 space-y-6">
-            <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-500">Real-time Platform</p>
+            <p className="text-xs font-bold uppercase tracking-[0.25em] text-amber-500">Author Portal</p>
             <h2 className="text-3xl md:text-5xl font-bold tracking-tight text-white font-serif">
-              The Author <br className="hidden md:inline" />
-              Operating System
+              Sadbhawana Publication <br className="hidden md:inline" />
+              Author Dashboard
             </h2>
             <p className="text-zinc-400 leading-relaxed font-normal text-base">
-              Say goodbye to email delays. With our custom platform, authors gain instant feedback from the production crew.
+              Track the progress of your book production stages, design approvals, and royalties directly inside our centralized dashboard system.
             </p>
             <div className="space-y-4">
               {[
-                "Track editing stages live",
-                "Approve book covers and print layouts",
-                "Inspect sales ledgers & download invoices",
-                "Chat directly with your designated designer & editor",
+                "Track editing and formatting stages live",
+                "Approve custom book cover designs and print drafts",
+                "Inspect transparent sales ledgers and royalty statements",
+                "Communicate directly with your designated layout designer & support team",
               ].map((val) => (
                 <div key={val} className="flex items-center gap-3">
                   <div className="h-5 w-5 rounded-full bg-emerald-500/10 border border-emerald-500/20 flex items-center justify-center">
@@ -1084,10 +1064,11 @@ export default function HomePage() {
             <div className="flex flex-col">
               <span className="text-lg font-black tracking-wider text-gradient font-serif">SADBHAWANA PUBLICATION</span>
               <span className="text-[8px] font-bold tracking-[0.2em] text-amber-500/80 uppercase">
+                Author Dashboard
               </span>
             </div>
             <p className="text-xs text-zinc-500 leading-relaxed font-normal">
-              Merging luxury material craft and modern tech integration to elevate authors into premium global brands.
+              An ISO 9001:2015 certified & MSME registered book publishing company based in Ambah, Morena, Madhya Pradesh. Literature is a service.
             </p>
           </div>
 

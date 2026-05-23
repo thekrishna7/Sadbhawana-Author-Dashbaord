@@ -31,6 +31,7 @@ export const ADMIN_NAV = [
   { href: "/admin/messages", label: "Messages", icon: "MessageSquare" },
   { href: "/admin/documents", label: "Documents", icon: "FileText" },
   { href: "/admin/ai", label: "AI Center", icon: "Sparkles" },
+  { href: "/admin/profile", label: "Profile Settings", icon: "User" },
   { href: "/admin/settings", label: "Settings", icon: "Settings" },
 ] as const;
 

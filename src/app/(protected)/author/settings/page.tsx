@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -27,7 +27,7 @@ export default function AuthorSettingsPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="Settings">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Settings">
       <GlassCard className="max-w-md space-y-4 p-10" hover={false}>
         <h3 className="font-semibold text-white">Change password</h3>
         <form onSubmit={changePassword} className="space-y-4">
@@ -39,3 +39,4 @@ export default function AuthorSettingsPage() {
     </DashboardShell>
   );
 }
+

@@ -23,7 +23,7 @@ export default function AuthorBookPage({ params }: { params: Promise<{ id: strin
   if (!bookId || !profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace">
       <BookWorkspace bookId={bookId} basePath="/author/books" isAdmin={false} currentUserId={profile.id} />
     </DashboardShell>
   );

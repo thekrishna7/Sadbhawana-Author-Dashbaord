@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -16,8 +16,9 @@ export default function AuthorMessagesPage() {
   }, []);
   if (!profile) return null;
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="Messages">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Messages">
       <MessagesPanel currentUserId={profile.id} title="HQ & team" />
     </DashboardShell>
   );
 }
+

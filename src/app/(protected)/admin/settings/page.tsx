@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -20,7 +20,7 @@ export default function AdminSettingsPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control" title="Settings" subtitle="System configuration">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Settings" subtitle="System configuration">
       <GlassCard className="max-w-2xl space-y-6 p-10" hover={false}>
         <h3 className="text-lg font-semibold text-white">Environment</h3>
         <p className="text-sm text-zinc-500">
@@ -39,3 +39,4 @@ export default function AdminSettingsPage() {
     </DashboardShell>
   );
 }
+

@@ -49,6 +49,19 @@ export async function GET() {
           ALTER TABLE books 
             ADD COLUMN IF NOT EXISTS book_type text NOT NULL DEFAULT 'sell' CHECK (book_type IN ('sell', 'not_for_sell')),
             ADD COLUMN IF NOT EXISTS serial_number text;
+
+          ALTER TYPE public.account_status ADD VALUE IF NOT EXISTS 'locked';
+          ALTER TYPE public.account_status ADD VALUE IF NOT EXISTS 'disabled';
+
+          ALTER TABLE profiles 
+            ADD COLUMN IF NOT EXISTS designation text,
+            ADD COLUMN IF NOT EXISTS signature_url text,
+            ADD COLUMN IF NOT EXISTS two_factor_enabled boolean DEFAULT false,
+            ADD COLUMN IF NOT EXISTS notification_preferences jsonb DEFAULT '{"email": true, "push": false}'::jsonb,
+            ADD COLUMN IF NOT EXISTS theme_preference text DEFAULT 'dark',
+            ADD COLUMN IF NOT EXISTS last_login_at timestamp with time zone,
+            ADD COLUMN IF NOT EXISTS device_login_history jsonb DEFAULT '[]'::jsonb,
+            ADD COLUMN IF NOT EXISTS two_factor_secret text;
         `;
         const res = await client.query(sql);
         queryResult = res;

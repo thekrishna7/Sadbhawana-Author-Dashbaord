@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect } from "react";
 import Link from "next/link";
@@ -30,7 +30,7 @@ export default function PipelinePage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control" title="Publishing Pipeline" subtitle="Kanban by stage">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Publishing Pipeline" subtitle="Kanban by stage">
       <div className="flex gap-6 overflow-x-auto pb-6">
         {PUBLISHING_STAGES.map((stage) => (
           <div key={stage.key} className="min-w-[280px] shrink-0">
@@ -51,3 +51,4 @@ export default function PipelinePage() {
     </DashboardShell>
   );
 }
+

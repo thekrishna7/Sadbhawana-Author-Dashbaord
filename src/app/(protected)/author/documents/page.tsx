@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -24,7 +24,7 @@ export default function AuthorDocumentsPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="Documents">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Documents">
       <div className="grid gap-4">
         {docs.map((d) => (
           <GlassCard key={d.id} className="flex justify-between p-6!" hover={false}>
@@ -40,3 +40,4 @@ export default function AuthorDocumentsPage() {
     </DashboardShell>
   );
 }
+

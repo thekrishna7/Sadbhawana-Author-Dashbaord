@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Image from "next/image";
@@ -96,7 +96,7 @@ export default function AdminAuthorsPage() {
     <DashboardShell
       nav={ADMIN_NAV}
       profile={profile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title="Authors"
       subtitle="Creator roster & publishing status"
       actions={
@@ -214,9 +214,9 @@ export default function AdminAuthorsPage() {
                       )}
                     </div>
                     <h3 className="text-xl font-semibold text-white mt-4">{author.full_name}</h3>
-                    <p className="text-sm text-zinc-500">{author.books?.length ?? 0} books · {stage}</p>
+                    <p className="text-sm text-zinc-500">{author.books?.length ?? 0} books Â· {stage}</p>
                     <p className="text-sm text-emerald-400/80 mt-2">
-                      ₹{Number((author as { author_royalties?: { available_balance: number }[] }).author_royalties?.[0]?.available_balance ?? 0).toLocaleString("en-IN")} available
+                      â‚¹{Number((author as { author_royalties?: { available_balance: number }[] }).author_royalties?.[0]?.available_balance ?? 0).toLocaleString("en-IN")} available
                     </p>
                   </div>
                 </GlassCard>
@@ -228,7 +228,7 @@ export default function AdminAuthorsPage() {
 
       <CreateUserModal open={modal} onClose={() => setModal(false)} onCreated={load} />
 
-      {/* ── Delete Author Confirmation Modal ─────────────────────────────────── */}
+      {/* â”€â”€ Delete Author Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {deletingUserItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
@@ -292,3 +292,4 @@ export default function AdminAuthorsPage() {
     </DashboardShell>
   );
 }
+

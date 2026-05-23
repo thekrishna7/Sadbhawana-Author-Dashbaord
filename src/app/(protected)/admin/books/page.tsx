@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
 import Link from "next/link";
@@ -19,12 +19,12 @@ import { useRealtimeTable } from "@/hooks/use-realtime";
 import { Skeleton } from "@/components/ui/skeleton";
 import { EmptyState } from "@/components/ui/empty-state";
 
-// ─── Types ───────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Types â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 type FilterKey = "all" | "sell" | "not_for_sell" | "published" | "editing" | "designing";
 
 type BookWithAuthor = Book & { author?: Profile };
 
-// ─── Stage badge config ───────────────────────────────────────────────────────
+// â”€â”€â”€ Stage badge config â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 const STAGE_COLORS: Record<string, string> = {
   submitted: "text-zinc-400 bg-zinc-500/10 border-zinc-500/20",
   review: "text-blue-400 bg-blue-500/10 border-blue-500/20",
@@ -44,7 +44,7 @@ const FILTERS: { key: FilterKey; label: string; icon?: React.ReactNode }[] = [
   { key: "designing", label: "Designing" },
 ];
 
-// ─── Serial number badge ──────────────────────────────────────────────────────
+// â”€â”€â”€ Serial number badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function SerialBadge({ serial }: { serial: string | null }) {
   if (!serial) return null;
   return (
@@ -57,7 +57,7 @@ function SerialBadge({ serial }: { serial: string | null }) {
   );
 }
 
-// ─── Book type badge ──────────────────────────────────────────────────────────
+// â”€â”€â”€ Book type badge â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BookTypeBadge({ type }: { type: BookType }) {
   if (type === "not_for_sell") {
     return (
@@ -75,7 +75,7 @@ function BookTypeBadge({ type }: { type: BookType }) {
   );
 }
 
-// ─── Book type selector (for creation modal) ──────────────────────────────────
+// â”€â”€â”€ Book type selector (for creation modal) â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BookTypeSelector({
   value,
   onChange,
@@ -87,14 +87,14 @@ function BookTypeSelector({
     {
       value: "sell",
       label: "Sell Book",
-      desc: "Commercial — earns royalties & sales",
+      desc: "Commercial â€” earns royalties & sales",
       icon: <ShoppingBag className="h-5 w-5" />,
       color: "emerald",
     },
     {
       value: "not_for_sell",
       label: "Not For Sell",
-      desc: "Internal / private — no sales or royalties",
+      desc: "Internal / private â€” no sales or royalties",
       icon: <BookX className="h-5 w-5" />,
       color: "orange",
     },
@@ -145,7 +145,7 @@ function BookTypeSelector({
   );
 }
 
-// ─── Book Card ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Book Card â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 function BookCard({ book, onDelete }: { book: BookWithAuthor; onDelete: (book: BookWithAuthor) => void }) {
   const stageLabel = PUBLISHING_STAGES.find((s) => s.key === book.current_stage)?.label ?? book.current_stage;
   const stageColor = STAGE_COLORS[book.current_stage] ?? "text-zinc-400 bg-zinc-500/10 border-zinc-500/20";
@@ -229,7 +229,7 @@ function BookCard({ book, onDelete }: { book: BookWithAuthor; onDelete: (book: B
   );
 }
 
-// ─── Main Page ────────────────────────────────────────────────────────────────
+// â”€â”€â”€ Main Page â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
 export default function AdminBooksPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [books, setBooks] = useState<BookWithAuthor[]>([]);
@@ -280,7 +280,7 @@ export default function AdminBooksPage() {
 
   useRealtimeTable("books", null, load);
 
-  // ─── Search + Filter ────────────────────────────────────────────────────────
+  // â”€â”€â”€ Search + Filter â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   const filtered = useMemo(() => {
     let list = books;
 
@@ -304,7 +304,7 @@ export default function AdminBooksPage() {
     return list;
   }, [books, search, activeFilter]);
 
-  // ─── Cover handler ──────────────────────────────────────────────────────────
+  // â”€â”€â”€ Cover handler â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function handleCoverSelect(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (file) {
@@ -315,12 +315,12 @@ export default function AdminBooksPage() {
     }
   }
 
-  // ─── Generate serial number ─────────────────────────────────────────────────
+  // â”€â”€â”€ Generate serial number â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   function generateSerial(count: number): string {
     return `SBP-${String(count + 1).padStart(4, "0")}`;
   }
 
-  // ─── Create book ────────────────────────────────────────────────────────────
+  // â”€â”€â”€ Create book â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€
   async function createBook(e: React.FormEvent) {
     e.preventDefault();
     setCreateError(null);
@@ -419,7 +419,7 @@ export default function AdminBooksPage() {
     <DashboardShell
       nav={ADMIN_NAV}
       profile={profile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title="Books"
       subtitle="Publishing catalog"
       actions={
@@ -443,7 +443,7 @@ export default function AdminBooksPage() {
         </button>
       }
     >
-      {/* ── Stats Row ─────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Stats Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="grid grid-cols-3 gap-4">
         {[
           { label: "Total Books", value: books.length, color: "violet" },
@@ -466,7 +466,7 @@ export default function AdminBooksPage() {
         ))}
       </div>
 
-      {/* ── Search + Filter Bar ───────────────────────────────────────────────── */}
+      {/* â”€â”€ Search + Filter Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-wrap items-center gap-3">
         {/* Search */}
         <div className="relative flex-1 min-w-[280px]">
@@ -530,7 +530,7 @@ export default function AdminBooksPage() {
         </span>
       </div>
 
-      {/* ── Filter Pill Row ────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Filter Pill Row â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex flex-wrap gap-2">
         {FILTERS.map((f) => (
           <button
@@ -548,7 +548,7 @@ export default function AdminBooksPage() {
         ))}
       </div>
 
-      {/* ── Books Grid ────────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Books Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {loading ? (
         <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
           {[1, 2, 3, 4, 5, 6].map((i) => (
@@ -618,7 +618,7 @@ export default function AdminBooksPage() {
         </div>
       )}
 
-      {/* ── Create Book Modal ─────────────────────────────────────────────────── */}
+      {/* â”€â”€ Create Book Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {showCreate && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-md p-4">
@@ -798,7 +798,7 @@ export default function AdminBooksPage() {
         )}
       </AnimatePresence>
 
-      {/* ── Delete Book Confirmation Modal ────────────────────────────────────── */}
+      {/* â”€â”€ Delete Book Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {deletingBookItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
@@ -862,3 +862,4 @@ export default function AdminBooksPage() {
     </DashboardShell>
   );
 }
+

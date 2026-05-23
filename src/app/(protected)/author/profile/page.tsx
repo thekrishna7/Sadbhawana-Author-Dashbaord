@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
@@ -60,7 +60,7 @@ export default function AuthorProfilePage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="Profile" subtitle="Syncs instantly with HQ">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Profile" subtitle="Syncs instantly with HQ">
       <div className="relative h-40 rounded-3xl overflow-hidden mb-20">
         {profile.banner_url ? <Image src={profile.banner_url} alt="" fill className="object-cover" /> : <div className="h-full bg-violet-900/30" />}
         <label className="absolute bottom-4 right-4 cursor-pointer rounded-xl bg-black/50 px-4 py-2 text-sm text-white">
@@ -88,9 +88,10 @@ export default function AuthorProfilePage() {
         ))}
 
         <button type="submit" disabled={saving} className="rounded-2xl bg-violet-600 px-8 py-3 text-white font-medium">
-          {saving ? "Saving…" : "Save profile"}
+          {saving ? "Savingâ€¦" : "Save profile"}
         </button>
       </form>
     </DashboardShell>
   );
 }
+

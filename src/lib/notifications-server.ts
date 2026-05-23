@@ -87,8 +87,15 @@ export async function triggerNotification(params: {
     const emailPayload = {
       from: `"Sadbhawana Publication" <${smtpEmail}>`,
       to: recipientEmail,
-      subject: `[Sadbhawana OS] ${title}`,
+      subject: `[Sadbhawana Publication] ${title}`,
       html: htmlContent,
+      attachments: [
+        {
+          filename: "logo.png",
+          path: path.join(process.cwd(), "public", "logo.png"),
+          cid: "logo",
+        },
+      ],
     };
 
     let sent = false;
@@ -266,8 +273,9 @@ function getLuxuryEmailHtml(params: { name: string; title: string; body: string;
 <body>
   <div class="wrapper">
     <div class="header">
-      <h1 class="logo">SADBHAWANA</h1>
-      <p class="subtitle">Luxury Publishing Ecosystem</p>
+      <img src="cid:logo" alt="Sadbhawana Publication Logo" style="height: 50px; width: auto; object-fit: contain; display: block; margin: 0 auto 12px auto;" />
+      <h1 class="logo">SADBHAWANA PUBLICATION</h1>
+      <p class="subtitle">Author Dashboard Portal</p>
     </div>
     <div class="content">
       <p class="greeting">Dear ${name},</p>
@@ -276,14 +284,14 @@ function getLuxuryEmailHtml(params: { name: string; title: string; body: string;
       ${
         link
           ? `<div class="btn-wrapper">
-               <a href="${link}" class="btn">Access OS Workspace</a>
+               <a href="${link}" class="btn">Access Dashboard Portal</a>
              </div>`
           : ""
       }
     </div>
     <div class="footer">
       <p class="footer-brand">Sadbhawana Publication</p>
-      <p style="margin: 6px 0 0 0; color: #52525b; font-weight: 400; letter-spacing: 0.02em;">Delivered securely via Publishing OS Enterprise Hub.</p>
+      <p style="margin: 6px 0 0 0; color: #52525b; font-weight: 400; letter-spacing: 0.02em;">Delivered securely via Sadbhawana Publication Author Dashboard.</p>
     </div>
   </div>
 </body>

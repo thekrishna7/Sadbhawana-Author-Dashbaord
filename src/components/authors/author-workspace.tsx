@@ -13,10 +13,19 @@ import { formatCurrency, getInitials, cn } from "@/lib/utils";
 import { useRealtimeTable } from "@/hooks/use-realtime";
 import type { Profile, Book } from "@/lib/types/database";
 import { PUBLISHING_STAGES } from "@/lib/constants";
-import { ArrowLeft, Trash2, Loader2, X } from "lucide-react";
+import { ArrowLeft, Trash2, Loader2, X, Settings } from "lucide-react";
 import { useToast } from "@/components/ui/toast";
+import { ManageAccountModal } from "@/components/admin/manage-account-modal";
 
 import { BookCover } from "@/components/books/book-cover";
+
+const STATUS_COLORS: Record<string, string> = {
+  active: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
+  suspended: "text-red-400 bg-red-500/10 border-red-500/25",
+  locked: "text-pink-400 bg-pink-500/10 border-pink-500/25",
+  disabled: "text-zinc-400 bg-white/5 border-white/10",
+  pending: "text-amber-400 bg-amber-500/10 border-amber-500/25",
+};
 
 export function AuthorWorkspace({
   authorId,
@@ -34,6 +43,7 @@ export function AuthorWorkspace({
   } | null>(null);
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [deleting, setDeleting] = useState(false);
+  const [manageModalOpen, setManageModalOpen] = useState(false);
   const toast = useToast();
 
   async function handleDelete() {
@@ -85,15 +95,15 @@ export function AuthorWorkspace({
     <DashboardShell
       nav={ADMIN_NAV}
       profile={adminProfile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title={author.full_name}
       subtitle="Author workspace"
       actions={
         <button
-          onClick={() => setShowDeleteModal(true)}
-          className="flex items-center gap-2 rounded-2xl border border-red-500/30 bg-red-500/10 px-5 py-2.5 text-sm font-semibold text-red-400 hover:bg-red-500/20 transition shadow-lg shadow-red-950/20"
+          onClick={() => setManageModalOpen(true)}
+          className="flex items-center gap-2 rounded-2xl border border-violet-500/30 bg-violet-500/10 px-5 py-2.5 text-sm font-semibold text-violet-300 hover:bg-violet-500/20 transition shadow-lg shadow-violet-950/20"
         >
-          <Trash2 className="h-4 w-4" /> Delete Author
+          <Settings className="h-4 w-4" /> Manage Account
         </button>
       }
     >
@@ -142,9 +152,17 @@ export function AuthorWorkspace({
                   <p className="text-zinc-400">{author.bio || "No biography yet."}</p>
                   <div className="grid sm:grid-cols-2 gap-4 text-sm">
                     <Info label="Email" value={author.email} />
-                    <Info label="Phone" value={author.phone ?? "—"} />
-                    <Info label="Website" value={author.website ?? "—"} />
+                    <Info label="Phone" value={author.phone ?? "â€”"} />
+                    <Info label="Website" value={author.website ?? "â€”"} />
                     <Info label="Joined" value={new Date(author.created_at).toLocaleDateString()} />
+                    <div className="sm:col-span-2">
+                      <p className="text-zinc-600 mb-1.5">Account Status</p>
+                      <span className={`inline-flex items-center text-[10px] font-bold uppercase tracking-wider px-3 py-1 rounded-full border ${
+                        STATUS_COLORS[author.status] ?? "text-zinc-400 border-white/10"
+                      }`}>
+                        {author.status}
+                      </span>
+                    </div>
                   </div>
                   <div className="grid grid-cols-3 gap-4 pt-4">
                     <Stat label="Active books" value={String(books.length)} />
@@ -217,7 +235,7 @@ export function AuthorWorkspace({
         </motion.div>
       </AnimatePresence>
 
-      {/* ── Delete Author Confirmation Modal ─────────────────────────────────── */}
+      {/* â”€â”€ Delete Author Confirmation Modal â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <AnimatePresence>
         {showDeleteModal && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/75 backdrop-blur-md p-4">
@@ -278,6 +296,13 @@ export function AuthorWorkspace({
           </div>
         )}
       </AnimatePresence>
+
+      <ManageAccountModal
+        open={manageModalOpen}
+        onClose={() => setManageModalOpen(false)}
+        profile={author}
+        onUpdate={load}
+      />
     </DashboardShell>
   );
 }
@@ -316,9 +341,10 @@ function AuthorActivity({ authorId }: { authorId: string }) {
     <ul className="space-y-3 mt-6">
       {logs.map((l, i) => (
         <li key={i} className="rounded-2xl border border-white/5 px-4 py-3 text-sm capitalize">
-          {l.action.replace(/_/g, " ")} — {new Date(l.created_at).toLocaleString()}
+          {l.action.replace(/_/g, " ")} â€” {new Date(l.created_at).toLocaleString()}
         </li>
       ))}
     </ul>
   );
 }
+

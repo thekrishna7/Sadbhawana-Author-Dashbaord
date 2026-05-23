@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useState, useEffect, useCallback } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -50,7 +50,7 @@ export default function AdminRoyaltiesPage() {
     <DashboardShell
       nav={ADMIN_NAV}
       profile={profile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title="Royalties"
       subtitle="Withdrawal requests & payouts"
     >
@@ -103,3 +103,4 @@ export default function AdminRoyaltiesPage() {
     </DashboardShell>
   );
 }
+

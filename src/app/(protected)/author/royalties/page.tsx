@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -69,7 +69,7 @@ export default function AuthorRoyaltiesPage() {
           userIds: admins.map((admin) => admin.id),
           type: "warning",
           title: "New Royalty Withdrawal Request",
-          body: `${profile.full_name || "Author"} has requested a royalty withdrawal of ₹${amt}.`,
+          body: `${profile.full_name || "Author"} has requested a royalty withdrawal of â‚¹${amt}.`,
           link: "/admin/royalties",
         });
       }
@@ -83,7 +83,7 @@ export default function AuthorRoyaltiesPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="Royalties" subtitle="Banking-grade earnings dashboard">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Royalties" subtitle="Banking-grade earnings dashboard">
       <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-4">
         <GlassCard glow className="p-8!">
           <p className="text-sm text-zinc-500">Available</p>
@@ -139,3 +139,4 @@ export default function AuthorRoyaltiesPage() {
     </DashboardShell>
   );
 }
+

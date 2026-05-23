@@ -57,7 +57,7 @@ export function BookCover({ title, coverUrl, className = "", fill = true }: Book
     >
       {/* Luxury border and pattern */}
       <div className="absolute inset-2 border border-white/5 rounded-xl pointer-events-none flex flex-col justify-between p-3">
-        <div className="text-[10px] text-white/20 uppercase tracking-widest text-left font-mono">PUBLISHING OS</div>
+        <div className="text-[10px] text-white/20 uppercase tracking-widest text-left font-mono">SADBHAWANA</div>
         <div className="text-[10px] text-white/20 uppercase tracking-widest text-right font-mono">EDITION I</div>
       </div>
       

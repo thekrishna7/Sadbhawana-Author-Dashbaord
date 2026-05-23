@@ -6,7 +6,7 @@ import { motion } from "framer-motion";
 import { createClient } from "@/lib/supabase/client";
 import { Loader2, Lock, Mail, ArrowLeft } from "lucide-react";
 import Link from "next/link";
-
+import Image from "next/image";
 import { Suspense } from "react";
 
 function LoginPageContent() {
@@ -58,6 +58,42 @@ function LoginPageContent() {
       return;
     }
 
+    // Log device and session history
+    try {
+      const ua = window.navigator.userAgent;
+      const browser = /edg/i.test(ua) ? "Edge" : /chrome/i.test(ua) ? "Chrome" : /firefox/i.test(ua) ? "Firefox" : /safari/i.test(ua) ? "Safari" : "Browser";
+      const os = /windows/i.test(ua) ? "Windows" : /mac/i.test(ua) ? "macOS" : /linux/i.test(ua) ? "Linux" : /android/i.test(ua) ? "Android" : /iphone|ipad/i.test(ua) ? "iOS" : "OS";
+
+      const { data: existingProf } = await supabase
+        .from("profiles")
+        .select("device_login_history")
+        .eq("id", authData.user.id)
+        .single();
+
+      const history = Array.isArray(existingProf?.device_login_history)
+        ? existingProf.device_login_history
+        : [];
+
+      const newEntry = {
+        timestamp: new Date().toISOString(),
+        browser,
+        os,
+        ip: "Client Session"
+      };
+
+      const updatedHistory = [newEntry, ...history].slice(0, 15);
+
+      await supabase
+        .from("profiles")
+        .update({
+          last_login_at: new Date().toISOString(),
+          device_login_history: updatedHistory
+        })
+        .eq("id", authData.user.id);
+    } catch (err) {
+      console.error("Failed to log device login history:", err);
+    }
+
     // Role-based automatic redirection
     if (profile.role === "super_admin") {
       router.push("/admin");
@@ -95,21 +131,27 @@ function LoginPageContent() {
         className="w-full max-w-md z-10"
       >
         {/* Logo and Brand Title */}
-        <div className="mb-10 text-center space-y-2">
-          <div className="inline-flex h-12 w-12 items-center justify-center rounded-2xl bg-gradient-to-br from-violet-500 to-amber-500 p-0.5 shadow-lg shadow-violet-950/50 mb-3">
-            <div className="flex h-full w-full items-center justify-center rounded-[14px] bg-[#0c0c12] text-white font-bold text-lg">
-              SP
-            </div>
+        <div className="mb-10 text-center space-y-4">
+          <div className="inline-flex justify-center mb-2">
+            <Image
+              src="/logo.png"
+              alt="Sadbhawana Publication Logo"
+              width={90}
+              height={90}
+              className="object-contain filter drop-shadow-[0_0_15px_rgba(139,92,246,0.25)]"
+            />
           </div>
-          <h2 className="text-4xl font-extrabold tracking-tight text-white">
-            Sadbhawana Publication
-          </h2>
-          <p className="text-sm font-semibold tracking-[0.2em] text-amber-500/80 uppercase">
-            Luxury Publishing Ecosystem
-          </p>
-          <p className="text-zinc-500 text-xs mt-1">
-            Author & Publisher Unified Portal
-          </p>
+          <div>
+            <h2 className="text-3xl font-black tracking-tight text-gradient font-serif">
+              Sadbhawana Publication
+            </h2>
+            <p className="text-sm font-bold tracking-[0.25em] text-amber-500/90 uppercase mt-2">
+              Author Dashboard Login
+            </p>
+            <p className="text-zinc-500 text-xs mt-1">
+              Official internal publishing portal
+            </p>
+          </div>
         </div>
 
         {/* Login Form Container */}

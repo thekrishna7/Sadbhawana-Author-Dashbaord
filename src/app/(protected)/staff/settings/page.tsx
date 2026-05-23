@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -15,8 +15,9 @@ export default function StaffSettingsPage() {
   }, []);
   if (!profile) return null;
   return (
-    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Ops" title="Settings">
+    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Workspace" title="Settings">
       <p className="text-zinc-500">Account managed by HQ.</p>
     </DashboardShell>
   );
 }
+

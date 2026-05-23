@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -34,12 +34,13 @@ export default function AnalyticsPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control" title="Analytics" subtitle="Enterprise insights">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Analytics" subtitle="Enterprise insights">
       <div className="grid gap-6 md:grid-cols-3">
-        <MetricCard label="Total revenue" value={stats.revenue} prefix="₹" icon={TrendingUp} />
+        <MetricCard label="Total revenue" value={stats.revenue} prefix="â‚¹" icon={TrendingUp} />
         <MetricCard label="Books" value={stats.books} icon={BookOpen} />
         <MetricCard label="Authors" value={stats.authors} icon={Users} />
       </div>
     </DashboardShell>
   );
 }
+

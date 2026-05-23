@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -20,8 +20,9 @@ export default function AdminMessagesPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control" title="Messages" subtitle="HQ communications">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Messages" subtitle="HQ communications">
       <MessagesPanel currentUserId={profile.id} title="HQ Inbox" />
     </DashboardShell>
   );
 }
+

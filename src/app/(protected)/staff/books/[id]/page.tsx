@@ -21,7 +21,7 @@ export default function StaffBookPage({ params }: { params: Promise<{ id: string
   if (!bookId || !profile) return null;
 
   return (
-    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Ops">
+    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Workspace">
       <BookWorkspace bookId={bookId} basePath="/staff" isAdmin={false} currentUserId={profile.id} />
     </DashboardShell>
   );

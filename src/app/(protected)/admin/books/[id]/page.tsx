@@ -32,7 +32,7 @@ export default function AdminBookPage({
   if (!bookId || !profile) return null;
 
   return (
-    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Mission Control">
+    <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard">
       <BookWorkspace
         bookId={bookId}
         basePath="/admin/books"

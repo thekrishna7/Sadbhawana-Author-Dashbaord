@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import Link from "next/link";
@@ -27,7 +27,7 @@ export default function AuthorBooksPage() {
   if (!profile) return null;
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator OS" title="My Books" subtitle="Full book workspaces">
+    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="My Books" subtitle="Full book workspaces">
       <div className="grid gap-10">
         {books.map((book) => (
           <Link key={book.id} href={`/author/books/${book.id}`}>
@@ -49,3 +49,4 @@ export default function AuthorBooksPage() {
     </DashboardShell>
   );
 }
+

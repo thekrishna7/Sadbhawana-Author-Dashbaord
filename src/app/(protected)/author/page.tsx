@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState, useCallback } from "react";
 import Link from "next/link";
@@ -145,7 +145,7 @@ export default function AuthorDashboardPage() {
     <DashboardShell
       nav={AUTHOR_NAV}
       profile={profile}
-      brand="Creator OS"
+      brand="Creator Workspace"
       title={`Welcome, ${profile.full_name.split(" ")[0]}`}
       subtitle={`Signed in as ${profile.email}`}
     >
@@ -167,13 +167,13 @@ export default function AuthorDashboardPage() {
         <MetricCard
           label="Available royalties"
           value={Number(royalties?.available_balance ?? 0)}
-          prefix="₹"
+          prefix="â‚¹"
           icon={Wallet}
         />
         <MetricCard
           label="Lifetime earnings"
           value={Number(royalties?.lifetime_earnings ?? 0)}
-          prefix="₹"
+          prefix="â‚¹"
           icon={TrendingUp}
         />
       </div>
@@ -202,7 +202,7 @@ export default function AuthorDashboardPage() {
                   />
                 </div>
                 <p className="text-zinc-500 mt-2">
-                  {book.progress_percent}% · Launch{" "}
+                  {book.progress_percent}% Â· Launch{" "}
                   {book.launch_date
                     ? new Date(book.launch_date).toLocaleDateString()
                     : "TBD"}
@@ -225,3 +225,4 @@ export default function AuthorDashboardPage() {
     </DashboardShell>
   );
 }
+

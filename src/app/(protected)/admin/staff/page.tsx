@@ -7,13 +7,16 @@ import { CreateUserModal } from "@/components/admin/create-user-modal";
 import { createClient } from "@/lib/supabase/client";
 import { ADMIN_NAV } from "@/lib/constants";
 import type { Profile } from "@/lib/types/database";
-import { Plus, Search, X, User, Mail, Shield } from "lucide-react";
+import { Plus, Search, X, User, Mail, Shield, Settings } from "lucide-react";
 import { useRealtimeTable } from "@/hooks/use-realtime";
 import { getInitials } from "@/lib/utils";
+import { ManageAccountModal } from "@/components/admin/manage-account-modal";
 
 const STATUS_COLORS: Record<string, string> = {
   active: "text-emerald-400 bg-emerald-500/10 border-emerald-500/25",
   suspended: "text-red-400 bg-red-500/10 border-red-500/25",
+  locked: "text-pink-400 bg-pink-500/10 border-pink-500/25",
+  disabled: "text-zinc-400 bg-white/5 border-white/10",
   pending: "text-amber-400 bg-amber-500/10 border-amber-500/25",
 };
 
@@ -21,6 +24,7 @@ export default function AdminStaffPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [staff, setStaff] = useState<Profile[]>([]);
   const [modal, setModal] = useState(false);
+  const [managingStaff, setManagingStaff] = useState<Profile | null>(null);
   const [search, setSearch] = useState("");
   const supabase = createClient();
 
@@ -60,7 +64,7 @@ export default function AdminStaffPage() {
     <DashboardShell
       nav={ADMIN_NAV}
       profile={profile}
-      brand="Mission Control"
+      brand="Author Dashboard"
       title="Staff"
       subtitle="Editorial & production team"
       actions={
@@ -72,7 +76,7 @@ export default function AdminStaffPage() {
         </button>
       }
     >
-      {/* ── Search Bar ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Search Bar â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       <div className="flex items-center gap-4">
         <div className="relative flex-1 max-w-lg">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
@@ -96,7 +100,7 @@ export default function AdminStaffPage() {
         </span>
       </div>
 
-      {/* ── Staff Grid ──────────────────────────────────────────────────────── */}
+      {/* â”€â”€ Staff Grid â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€â”€ */}
       {filtered.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-24 text-center">
           <div className="w-14 h-14 rounded-2xl bg-zinc-800 flex items-center justify-center mb-4">
@@ -137,14 +141,22 @@ export default function AdminStaffPage() {
                   </div>
                   {s.phone && (
                     <div className="flex items-center gap-2 text-xs text-zinc-400">
-                      <span className="text-zinc-600">📞</span>
+                      <span className="text-zinc-600">ðŸ“ž</span>
                       <span>{s.phone}</span>
                     </div>
                   )}
                 </div>
 
-                <div className="text-[10px] text-zinc-600 border-t border-white/5 pt-3">
-                  Joined {new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                <div className="flex items-center justify-between border-t border-white/5 pt-3">
+                  <span className="text-[10px] text-zinc-600">
+                    Joined {new Date(s.created_at).toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" })}
+                  </span>
+                  <button
+                    onClick={() => setManagingStaff(s)}
+                    className="flex items-center gap-1 rounded-xl border border-violet-500/30 bg-violet-500/5 px-3 py-1.5 text-[11px] font-bold text-violet-300 hover:bg-violet-500/25 transition cursor-pointer"
+                  >
+                    <Settings className="h-3 w-3" /> Manage
+                  </button>
                 </div>
               </div>
             </GlassCard>
@@ -153,6 +165,16 @@ export default function AdminStaffPage() {
       )}
 
       <CreateUserModal open={modal} onClose={() => setModal(false)} onCreated={load} defaultRole="staff" />
+
+      {managingStaff && (
+        <ManageAccountModal
+          open={!!managingStaff}
+          onClose={() => setManagingStaff(null)}
+          profile={managingStaff}
+          onUpdate={load}
+        />
+      )}
     </DashboardShell>
   );
 }
+

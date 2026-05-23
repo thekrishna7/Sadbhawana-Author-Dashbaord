@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useEffect, useState } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
@@ -16,8 +16,9 @@ export default function StaffMessagesPage() {
   }, []);
   if (!profile) return null;
   return (
-    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Ops" title="Messages">
+    <DashboardShell nav={STAFF_NAV} profile={profile} brand="Staff Workspace" title="Messages">
       <MessagesPanel currentUserId={profile.id} title="Team chat" />
     </DashboardShell>
   );
 }
+
