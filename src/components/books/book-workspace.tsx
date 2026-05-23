@@ -277,7 +277,7 @@ export function BookWorkspace({
             />
           )}
           {tab === "royalties" && (
-            <RoyaltiesTab authorId={book.author_id} />
+            <RoyaltiesTab authorId={book.author_id} bookId={bookId} isAdmin={isAdmin} />
           )}
           {tab === "messages" && (
             <MessagesPanel
@@ -371,45 +371,132 @@ function Stat({ label, value }: { label: string; value: string }) {
   );
 }
 
-function RoyaltiesTab({ authorId }: { authorId: string }) {
-  const [data, setData] = useState<{
+function RoyaltiesTab({ authorId, bookId, isAdmin }: { authorId: string; bookId: string; isAdmin: boolean }) {
+  const [royalties, setRoyalties] = useState<{
     available_balance: number;
     pending_balance: number;
     lifetime_earnings: number;
+    total_withdrawn?: number;
+    last_payout_at?: string | null;
   } | null>(null);
+  const [transactions, setTransactions] = useState<{ id: string; amount: number; tx_type: string; description: string | null; created_at: string }[]>([]);
+  const [creditAmount, setCreditAmount] = useState("");
+  const [creditDesc, setCreditDesc] = useState("");
+  const [crediting, setCrediting] = useState(false);
 
-  useEffect(() => {
+  const loadRoyalties = useCallback(async () => {
     const supabase = createClient();
-    supabase
-      .from("author_royalties")
-      .select("*")
-      .eq("author_id", authorId)
-      .single()
-      .then(({ data }) => setData(data));
-  }, [authorId]);
+    const [rRes, tRes] = await Promise.all([
+      supabase.from("author_royalties").select("*").eq("author_id", authorId).single(),
+      supabase.from("royalty_transactions").select("*").eq("author_id", authorId).eq("book_id", bookId).order("created_at", { ascending: false }).limit(10),
+    ]);
+    setRoyalties(rRes.data);
+    setTransactions(tRes.data ?? []);
+  }, [authorId, bookId]);
 
-  if (!data) return <Skeleton className="h-48" />;
+  useEffect(() => { loadRoyalties(); }, [loadRoyalties]);
+
+  async function creditRoyalty(e: React.FormEvent) {
+    e.preventDefault();
+    if (!creditAmount || !creditDesc) return;
+    setCrediting(true);
+    await fetch("/api/admin/royalties", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({ author_id: authorId, book_id: bookId, amount: Number(creditAmount), description: creditDesc, tx_type: "credit" }),
+    });
+    setCrediting(false);
+    setCreditAmount("");
+    setCreditDesc("");
+    loadRoyalties();
+  }
+
+  if (!royalties) return <Skeleton className="h-48" />;
 
   return (
-    <div className="grid gap-6 md:grid-cols-3">
-      <GlassCard glow>
-        <p className="text-sm text-zinc-500">Available</p>
-        <p className="text-4xl font-bold text-emerald-400 mt-2">
-          {formatCurrency(data.available_balance)}
-        </p>
-      </GlassCard>
-      <GlassCard>
-        <p className="text-sm text-zinc-500">Pending</p>
-        <p className="text-4xl font-bold text-amber-400 mt-2">
-          {formatCurrency(data.pending_balance)}
-        </p>
-      </GlassCard>
-      <GlassCard>
-        <p className="text-sm text-zinc-500">Lifetime</p>
-        <p className="text-4xl font-bold text-white mt-2">
-          {formatCurrency(data.lifetime_earnings)}
-        </p>
-      </GlassCard>
+    <div className="space-y-8">
+      {/* Wallet Stats */}
+      <div className="grid gap-4 md:grid-cols-3">
+        <GlassCard glow className="p-6!">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest">Available Balance</p>
+          <p className="text-3xl font-bold text-emerald-400 mt-2">{formatCurrency(Number(royalties.available_balance))}</p>
+        </GlassCard>
+        <GlassCard className="p-6!">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest">Pending</p>
+          <p className="text-3xl font-bold text-amber-400 mt-2">{formatCurrency(Number(royalties.pending_balance))}</p>
+        </GlassCard>
+        <GlassCard className="p-6!">
+          <p className="text-xs text-zinc-500 uppercase tracking-widest">Lifetime Earnings</p>
+          <p className="text-3xl font-bold text-white mt-2">{formatCurrency(Number(royalties.lifetime_earnings))}</p>
+          {royalties.last_payout_at && (
+            <p className="text-xs text-zinc-600 mt-2">Last payout: {new Date(royalties.last_payout_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+          )}
+        </GlassCard>
+      </div>
+
+      {/* Admin Credit Form */}
+      {isAdmin && (
+        <GlassCard className="max-w-lg space-y-4 p-8" hover={false}>
+          <div className="flex items-center gap-2">
+            <Wallet className="h-4 w-4 text-violet-400" />
+            <h3 className="text-base font-semibold text-white">Credit Royalty for this Book</h3>
+          </div>
+          <form onSubmit={creditRoyalty} className="space-y-3">
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Amount (₹)</label>
+              <input
+                type="number"
+                required
+                min={1}
+                value={creditAmount}
+                onChange={(e) => setCreditAmount(e.target.value)}
+                placeholder="e.g. 2500"
+                className="mt-1.5 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder-zinc-600"
+              />
+            </div>
+            <div>
+              <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wide">Description</label>
+              <input
+                type="text"
+                required
+                value={creditDesc}
+                onChange={(e) => setCreditDesc(e.target.value)}
+                placeholder="e.g. Q2 2025 sales royalty"
+                className="mt-1.5 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white text-sm placeholder-zinc-600"
+              />
+            </div>
+            <button
+              type="submit"
+              disabled={crediting}
+              className="flex items-center gap-2 rounded-2xl bg-gradient-to-r from-violet-600 to-purple-600 px-6 py-3 font-semibold text-white hover:opacity-90 disabled:opacity-50 transition text-sm"
+            >
+              {crediting ? <><Loader2 className="h-4 w-4 animate-spin" /> Crediting…</> : <><Wallet className="h-4 w-4" /> Credit Royalty</>}
+            </button>
+          </form>
+        </GlassCard>
+      )}
+
+      {/* Book Royalty Ledger */}
+      {transactions.length > 0 && (
+        <GlassCard hover={false}>
+          <div className="px-6 pt-6 pb-4 border-b border-white/6">
+            <h3 className="text-base font-semibold text-white">Royalty Ledger — This Book</h3>
+          </div>
+          <ul className="divide-y divide-white/4">
+            {transactions.map((t) => (
+              <li key={t.id} className="flex items-center justify-between px-6 py-4 text-sm">
+                <div>
+                  <p className="text-zinc-300">{t.description ?? t.tx_type}</p>
+                  <p className="text-xs text-zinc-600 mt-0.5">{new Date(t.created_at).toLocaleDateString("en-IN", { day: "numeric", month: "short", year: "numeric" })}</p>
+                </div>
+                <span className={cn("font-bold font-mono", Number(t.amount) >= 0 ? "text-emerald-400" : "text-red-400")}>
+                  {Number(t.amount) >= 0 ? "+" : ""}{formatCurrency(Math.abs(Number(t.amount)))}
+                </span>
+              </li>
+            ))}
+          </ul>
+        </GlassCard>
+      )}
     </div>
   );
 }

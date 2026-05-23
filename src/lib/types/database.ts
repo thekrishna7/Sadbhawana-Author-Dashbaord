@@ -64,6 +64,8 @@ export interface Sales {
   monthly_revenue: number;
   total_revenue: number;
   ranking: number | null;
+  royalty_earned: number | null;
+  last_royalty_credit_at: string | null;
   updated_at: string;
 }
 
@@ -72,6 +74,7 @@ export interface AuthorRoyalties {
   available_balance: number;
   pending_balance: number;
   lifetime_earnings: number;
+  total_withdrawn: number | null;
   last_payout_at: string | null;
   next_payout_at: string | null;
 }
@@ -132,11 +135,25 @@ export interface WithdrawalRequest {
   author_id: string;
   amount: number;
   bank_snapshot: Record<string, string>;
-  status: string;
+  status: "pending" | "approved" | "rejected" | "paid";
   utr: string | null;
   admin_notes: string | null;
+  processed_by: string | null;
+  processed_at: string | null;
   created_at: string;
   author?: Profile;
+}
+
+export interface RoyaltyTransaction {
+  id: string;
+  author_id: string;
+  book_id: string | null;
+  amount: number;
+  tx_type: "credit" | "payout" | "adjustment";
+  description: string | null;
+  created_by: string | null;
+  created_at: string;
+  book?: Pick<Book, "id" | "title">;
 }
 
 export interface Notification {
