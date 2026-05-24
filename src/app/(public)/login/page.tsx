@@ -251,7 +251,7 @@ function LoginPageContent() {
               Sadbhawana Publication
             </h2>
             <p className="text-[10px] font-bold tracking-[0.2em] text-amber-500 uppercase">
-              Logi Your Author's Dashbaord
+              Login Your Author's Dashbaord
             </p>
           </div>
         </div>
