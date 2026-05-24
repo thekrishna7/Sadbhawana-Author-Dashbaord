@@ -550,7 +550,7 @@ function DocumentsTab({
     const supabase = createClient();
     const { data, error: err } = await supabase
       .from("documents")
-      .select("*, uploader:profiles(full_name)")
+      .select("*, uploader:profiles!uploaded_by(full_name)")
       .or(`book_id.eq.${bookId},author_id.eq.${authorId}`)
       .order("created_at", { ascending: false });
 

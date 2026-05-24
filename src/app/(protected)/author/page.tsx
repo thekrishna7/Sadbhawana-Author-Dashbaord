@@ -24,7 +24,7 @@ export default function AuthorDashboardPage() {
   // Upload fields state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [docTitle, setDocTitle] = useState("");
-  const [docCategory, setDocCategory] = useState("manuscript");
+  const [docCategory, setDocCategory] = useState("other");
   const [selectedBookId, setSelectedBookId] = useState("");
   const [uploading, setUploading] = useState(false);
 
@@ -86,7 +86,7 @@ export default function AuthorDashboardPage() {
     try {
       const { data, error } = await supabase
         .from("documents")
-        .select("*, uploader:profiles(full_name)")
+        .select("*, uploader:profiles!uploaded_by(full_name)")
         .eq("author_id", profile.id)
         .neq("uploaded_by", profile.id)
         .order("created_at", { ascending: false });
@@ -177,7 +177,7 @@ export default function AuthorDashboardPage() {
       setSelectedFile(null);
       setDocTitle("");
       setSelectedBookId("");
-      setDocCategory("manuscript");
+      setDocCategory("other");
     } catch (err: any) {
       console.error("Upload process error:", err);
       toast.error(err.message || "Upload failed.");
@@ -329,7 +329,7 @@ export default function AuthorDashboardPage() {
                     setSelectedFile(null);
                     setDocTitle("");
                     setSelectedBookId("");
-                    setDocCategory("manuscript");
+                    setDocCategory("other");
                   }}
                   className="rounded-full bg-white/5 p-1.5 text-zinc-400 hover:text-white transition"
                 >
@@ -411,11 +411,13 @@ export default function AuthorDashboardPage() {
                     value={docCategory}
                     onChange={(e) => setDocCategory(e.target.value)}
                   >
-                    <option value="manuscript">Manuscript Draft</option>
+                    <option value="other">Manuscript Draft</option>
                     <option value="agreement">Agreement / Contract</option>
-                    <option value="cover">Book Cover Concept</option>
-                    <option value="royalty">Royalty Statement</option>
+                    <option value="other">Book Cover Concept</option>
+                    <option value="royalty_statement">Royalty Statement</option>
                     <option value="invoice">Invoice / Bill</option>
+                    <option value="isbn_certificate">ISBN Document</option>
+                    <option value="contract">Contract</option>
                     <option value="other">Other Document</option>
                   </select>
                 </div>
