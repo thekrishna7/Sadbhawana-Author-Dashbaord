@@ -112,7 +112,6 @@ export function AuthorShell({
   const navItems = [
     { href: "/author", label: "Home", icon: Home },
     { href: "/author/books", label: "Books", icon: BookOpen },
-    { href: "/author/notifications", label: "Notifications", icon: Bell, badge: unreadNotifications },
     { href: "/author/profile", label: "Profile", icon: User },
   ];
 

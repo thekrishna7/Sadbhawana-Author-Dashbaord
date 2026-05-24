@@ -8,6 +8,7 @@ const schema = z.object({
   password: z.string().min(8),
   full_name: z.string().min(1),
   role: z.enum(["author", "staff", "super_admin"]),
+  phone: z.string().optional(),
 });
 
 export async function POST(request: Request) {
@@ -50,6 +51,7 @@ export async function POST(request: Request) {
       role: body.role,
       email: body.email,
       full_name: body.full_name,
+      phone: body.phone || null,
       status: "active",
     });
 

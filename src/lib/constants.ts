@@ -23,26 +23,14 @@ export const STAGE_COLORS: Record<string, string> = {
 export const ADMIN_NAV = [
   { href: "/admin", label: "Overview", icon: "LayoutDashboard" },
   { href: "/admin/authors", label: "Authors", icon: "Users" },
-  { href: "/admin/staff", label: "Staff", icon: "UserCog" },
   { href: "/admin/books", label: "Books", icon: "BookOpen" },
-  { href: "/admin/pipeline", label: "Publishing Pipeline", icon: "GitBranch" },
-  { href: "/admin/royalties", label: "Royalties", icon: "Wallet" },
-  { href: "/admin/analytics", label: "Analytics", icon: "BarChart3" },
-  { href: "/admin/messages", label: "Messages", icon: "MessageSquare" },
-  { href: "/admin/documents", label: "Documents", icon: "FileText" },
-  { href: "/admin/ai", label: "AI Center", icon: "Sparkles" },
   { href: "/admin/profile", label: "Profile Settings", icon: "User" },
-  { href: "/admin/settings", label: "Settings", icon: "Settings" },
 ] as const;
 
 export const AUTHOR_NAV = [
   { href: "/author", label: "Dashboard", icon: "LayoutDashboard" },
   { href: "/author/books", label: "My Books", icon: "BookOpen" },
-  { href: "/author/royalties", label: "Royalties", icon: "Wallet" },
-  { href: "/author/messages", label: "Messages", icon: "MessageSquare" },
-  { href: "/author/documents", label: "Documents", icon: "FileText" },
   { href: "/author/profile", label: "Profile", icon: "User" },
-  { href: "/author/settings", label: "Settings", icon: "Settings" },
 ] as const;
 
 export const STAFF_NAV = [
