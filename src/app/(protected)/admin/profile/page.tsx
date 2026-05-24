@@ -13,6 +13,7 @@ import { useRouter } from "next/navigation";
 
 export default function AdminProfilePage() {
   const [profile, setProfile] = useState<any | null>(null);
+  const [loading, setLoading] = useState(true);
 
   // Profile fields state
   const [name, setName] = useState("");
@@ -32,22 +33,28 @@ export default function AdminProfilePage() {
   const router = useRouter();
 
   const loadProfile = async () => {
-    const { data: { user } } = await supabase.auth.getUser();
-    if (!user) {
-      router.push("/login");
-      return;
-    }
-    const { data: p } = await supabase
-      .from("profiles")
-      .select("*")
-      .eq("id", user.id)
-      .single();
-    
-    if (p) {
-      setProfile(p);
-      setName(p.full_name || "");
-      setEmail(p.email || "");
-      setPhone(p.phone || "");
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) {
+        router.push("/login");
+        return;
+      }
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", user.id)
+        .single();
+      
+      if (p) {
+        setProfile(p);
+        setName(p.full_name || "");
+        setEmail(p.email || "");
+        setPhone(p.phone || "");
+      }
+    } catch (err: any) {
+      console.error(err);
+    } finally {
+      setLoading(false);
     }
   };
 
