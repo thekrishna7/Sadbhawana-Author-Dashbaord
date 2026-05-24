@@ -1,97 +1,264 @@
-﻿"use client";
+"use client";
 
 import { useEffect, useState } from "react";
 import Image from "next/image";
-import { DashboardShell } from "@/components/layout/dashboard-shell";
+import { AuthorShell } from "@/components/layout/author-shell";
 import { createClient } from "@/lib/supabase/client";
 import { uploadPublic } from "@/lib/storage";
-import { AUTHOR_NAV } from "@/lib/constants";
+import { useToast } from "@/components/ui/toast";
 import type { Profile } from "@/lib/types/database";
+import { Loader2, Camera, Lock, LogOut, CheckCircle2, User, Mail } from "lucide-react";
+import { useRouter } from "next/navigation";
 
 export default function AuthorProfilePage() {
   const [profile, setProfile] = useState<Profile | null>(null);
-  const [form, setForm] = useState<Partial<Profile>>({});
-  const [saving, setSaving] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [confirmPassword, setConfirmPassword] = useState("");
+  
+  const [savingProfile, setSavingProfile] = useState(false);
+  const [updatingPassword, setUpdatingPassword] = useState(false);
+  const [uploadingAvatar, setUploadingAvatar] = useState(false);
+
+  const supabase = createClient();
+  const toast = useToast();
+  const router = useRouter();
 
   useEffect(() => {
-    createClient().auth.getUser().then(async ({ data }) => {
+    supabase.auth.getUser().then(async ({ data }) => {
       if (!data.user) return;
-      const { data: p } = await createClient().from("profiles").select("*").eq("id", data.user.id).single();
-      setProfile(p as Profile);
-      setForm(p as Profile);
+      const { data: p } = await supabase
+        .from("profiles")
+        .select("*")
+        .eq("id", data.user.id)
+        .single();
+      
+      if (p) {
+        setProfile(p as Profile);
+        setName(p.full_name || "");
+        setEmail(p.email || "");
+      }
     });
-  }, []);
+  }, [supabase]);
 
-  async function save(e: React.FormEvent) {
+  // Update profile name
+  async function handleUpdateProfile(e: React.FormEvent) {
     e.preventDefault();
     if (!profile) return;
-    setSaving(true);
-    await createClient().from("profiles").update({
-      full_name: form.full_name,
-      bio: form.bio,
-      about_author: form.about_author,
-      website: form.website,
-      phone: form.phone,
-      bank_account_name: form.bank_account_name,
-      bank_account_number: form.bank_account_number,
-      bank_ifsc: form.bank_ifsc,
-      bank_upi: form.bank_upi,
-      social_links: form.social_links,
-    }).eq("id", profile.id);
-    setSaving(false);
+    setSavingProfile(true);
+
+    try {
+      const { error } = await supabase
+        .from("profiles")
+        .update({ full_name: name.trim() })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+      
+      setProfile((prev) => (prev ? { ...prev, full_name: name.trim() } : prev));
+      toast.success("Profile name updated.");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to update name.");
+    } finally {
+      setSavingProfile(false);
+    }
   }
 
-  async function uploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
+  // Update password
+  async function handleUpdatePassword(e: React.FormEvent) {
+    e.preventDefault();
+    if (newPassword !== confirmPassword) {
+      toast.error("Passwords do not match");
+      return;
+    }
+    if (newPassword.length < 6) {
+      toast.error("Password must be at least 6 characters");
+      return;
+    }
+
+    setUpdatingPassword(true);
+    try {
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
+      if (error) throw error;
+      
+      toast.success("Password changed successfully!");
+      setNewPassword("");
+      setConfirmPassword("");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to change password.");
+    } finally {
+      setUpdatingPassword(false);
+    }
+  }
+
+  // Upload avatar
+  async function handleUploadAvatar(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0];
     if (!file || !profile) return;
-    const { publicUrl } = await uploadPublic("avatars", profile.id, file);
-    await createClient().from("profiles").update({ avatar_url: publicUrl }).eq("id", profile.id);
-    setProfile((p) => (p ? { ...p, avatar_url: publicUrl } : p));
+
+    setUploadingAvatar(true);
+    try {
+      const { publicUrl } = await uploadPublic("avatars", profile.id, file);
+      const { error } = await supabase
+        .from("profiles")
+        .update({ avatar_url: publicUrl })
+        .eq("id", profile.id);
+
+      if (error) throw error;
+
+      setProfile((p) => (p ? { ...p, avatar_url: publicUrl } : p));
+      toast.success("Profile photo updated!");
+    } catch (err: any) {
+      toast.error(err.message || "Failed to upload photo.");
+    } finally {
+      setUploadingAvatar(false);
+    }
   }
 
-  async function uploadBanner(e: React.ChangeEvent<HTMLInputElement>) {
-    const file = e.target.files?.[0];
-    if (!file || !profile) return;
-    const { publicUrl } = await uploadPublic("banners", profile.id, file);
-    await createClient().from("profiles").update({ banner_url: publicUrl }).eq("id", profile.id);
-    setProfile((p) => (p ? { ...p, banner_url: publicUrl } : p));
-  }
+  // Logout
+  const handleLogout = async () => {
+    await supabase.auth.signOut();
+    router.push("/login");
+    router.refresh();
+  };
 
-  if (!profile) return null;
+  if (!profile) {
+    return (
+      <div className="min-h-screen bg-[#030303] text-zinc-100 flex items-center justify-center">
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
+      </div>
+    );
+  }
 
   return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace" title="Profile" subtitle="Syncs instantly with HQ">
-      <div className="relative h-40 rounded-3xl overflow-hidden mb-20">
-        {profile.banner_url ? <Image src={profile.banner_url} alt="" fill className="object-cover" /> : <div className="h-full bg-violet-900/30" />}
-        <label className="absolute bottom-4 right-4 cursor-pointer rounded-xl bg-black/50 px-4 py-2 text-sm text-white">
-          Change banner <input type="file" accept="image/*" className="hidden" onChange={uploadBanner} />
-        </label>
-      </div>
-
-      <form onSubmit={save} className="max-w-2xl space-y-6">
-        <label className="inline-block cursor-pointer">
-          <div className="h-24 w-24 rounded-2xl overflow-hidden bg-violet-500/20 relative">
-            {profile.avatar_url && <Image src={profile.avatar_url} alt="" fill className="object-cover" />}
-          </div>
-          <input type="file" accept="image/*" className="hidden" onChange={uploadAvatar} />
-        </label>
-
-        {(["full_name", "bio", "about_author", "website", "phone", "bank_account_name", "bank_account_number", "bank_ifsc", "bank_upi"] as const).map((key) => (
-          <div key={key}>
-            <label className="text-sm text-zinc-500 capitalize">{key.replace(/_/g, " ")}</label>
-            {key === "bio" || key === "about_author" ? (
-              <textarea className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 p-4 text-white min-h-[80px]" value={String(form[key] ?? "")} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
+    <AuthorShell title="Profile">
+      <div className="space-y-8 flex-grow flex flex-col justify-center max-w-md mx-auto w-full">
+        {/* Profile Photo Area */}
+        <div className="flex flex-col items-center space-y-4">
+          <div className="relative group">
+            {profile.avatar_url ? (
+              <div className="h-28 w-28 rounded-full overflow-hidden border-2 border-white/10 relative">
+                <Image src={profile.avatar_url} alt={profile.full_name} fill className="object-cover" />
+              </div>
             ) : (
-              <input className="mt-2 w-full rounded-2xl border border-white/10 bg-white/5 px-4 py-3 text-white" value={String(form[key] ?? "")} onChange={(e) => setForm((f) => ({ ...f, [key]: e.target.value }))} />
+              <div className="h-28 w-28 rounded-full bg-amber-500/10 border-2 border-dashed border-amber-500/20 flex items-center justify-center text-4xl font-serif text-amber-500 font-bold">
+                {profile.full_name?.charAt(0) || "A"}
+              </div>
             )}
-          </div>
-        ))}
 
-        <button type="submit" disabled={saving} className="rounded-2xl bg-violet-600 px-8 py-3 text-white font-medium">
-          {saving ? "Savingâ€¦" : "Save profile"}
-        </button>
-      </form>
-    </DashboardShell>
+            {/* Upload Overlay */}
+            <label className="absolute bottom-1 right-1 cursor-pointer h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center text-black border-2 border-[#050508] shadow-lg hover:scale-105 transition-all">
+              {uploadingAvatar ? (
+                <Loader2 className="h-4 w-4 animate-spin text-black" />
+              ) : (
+                <Camera className="h-4 w-4" />
+              )}
+              <input type="file" accept="image/*" className="hidden" disabled={uploadingAvatar} onChange={handleUploadAvatar} />
+            </label>
+          </div>
+
+          <div className="text-center space-y-0.5">
+            <h3 className="text-lg font-bold text-white font-serif">{profile.full_name}</h3>
+            <p className="text-xs text-zinc-500 font-medium">Author Account</p>
+          </div>
+        </div>
+
+        {/* Profile details form */}
+        <form onSubmit={handleUpdateProfile} className="space-y-4 pt-4 border-t border-white/5">
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Full Name</label>
+            <div className="relative">
+              <User className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="text"
+                required
+                value={name}
+                onChange={(e) => setName(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                placeholder="Your name"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Email Address (Read Only)</label>
+            <div className="relative">
+              <Mail className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-600" />
+              <input
+                type="email"
+                readOnly
+                value={email}
+                className="w-full rounded-2xl border border-white/5 bg-zinc-950/40 py-3.5 pl-11 pr-4 text-xs text-zinc-500 focus:outline-none font-semibold cursor-not-allowed select-none"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={savingProfile || name.trim() === profile.full_name}
+            className="w-full rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 py-3 text-xs font-bold text-white uppercase tracking-wider transition disabled:opacity-40"
+          >
+            {savingProfile ? "Saving changes..." : "Save Profile Details"}
+          </button>
+        </form>
+
+        {/* Change Password Form */}
+        <form onSubmit={handleUpdatePassword} className="space-y-4 pt-6 border-t border-white/5">
+          <div className="space-y-1">
+            <h4 className="text-sm font-bold text-white font-serif">Security Settings</h4>
+            <p className="text-[10px] text-zinc-500">Update your security passkey for this secure device.</p>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">New Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="password"
+                required
+                value={newPassword}
+                onChange={(e) => setNewPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                placeholder="Minimum 6 characters"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-1.5">
+            <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Confirm Password</label>
+            <div className="relative">
+              <Lock className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500" />
+              <input
+                type="password"
+                required
+                value={confirmPassword}
+                onChange={(e) => setConfirmPassword(e.target.value)}
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                placeholder="Re-enter new password"
+              />
+            </div>
+          </div>
+
+          <button
+            type="submit"
+            disabled={updatingPassword || !newPassword || !confirmPassword}
+            className="w-full rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 py-3 text-xs font-bold text-white uppercase tracking-wider transition disabled:opacity-40"
+          >
+            {updatingPassword ? "Updating passkey..." : "Change Passkey"}
+          </button>
+        </form>
+
+        {/* Logout Section */}
+        <div className="pt-6 border-t border-white/5">
+          <button
+            onClick={handleLogout}
+            className="w-full flex items-center justify-center gap-2 rounded-2xl border border-amber-500/20 bg-amber-500/5 hover:bg-amber-500/10 py-3.5 text-xs font-bold text-amber-500 uppercase tracking-wider transition"
+          >
+            <LogOut className="h-4 w-4" /> Sign Out Workspace
+          </button>
+        </div>
+      </div>
+    </AuthorShell>
   );
 }
-

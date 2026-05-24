@@ -1,30 +1,14 @@
 "use client";
 
-import { useEffect, useState } from "react";
-import { createClient } from "@/lib/supabase/client";
-import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { BookWorkspace } from "@/components/books/book-workspace";
-import { AUTHOR_NAV } from "@/lib/constants";
-import type { Profile } from "@/lib/types/database";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function AuthorBookPage({ params }: { params: Promise<{ id: string }> }) {
-  const [bookId, setBookId] = useState<string | null>(null);
-  const [profile, setProfile] = useState<Profile | null>(null);
+export default function AuthorBookPage() {
+  const router = useRouter();
 
   useEffect(() => {
-    params.then((p) => setBookId(p.id));
-    const supabase = createClient();
-    supabase.auth.getUser().then(({ data }) => {
-      if (data.user)
-        supabase.from("profiles").select("*").eq("id", data.user.id).single().then(({ data }) => setProfile(data as Profile));
-    });
-  }, [params]);
+    router.replace("/author/books");
+  }, [router]);
 
-  if (!bookId || !profile) return null;
-
-  return (
-    <DashboardShell nav={AUTHOR_NAV} profile={profile} brand="Creator Workspace">
-      <BookWorkspace bookId={bookId} basePath="/author/books" isAdmin={false} currentUserId={profile.id} />
-    </DashboardShell>
-  );
+  return null;
 }

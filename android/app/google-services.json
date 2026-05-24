@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "720473934855",
+    "project_id": "sadbhawana-author-dashbaord",
+    "storage_bucket": "sadbhawana-author-dashbaord.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:720473934855:android:16e0027176738ce4c26ea2",
+        "android_client_info": {
+          "package_name": "com.sadbhawana.authordashboard"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyD0BXm1PYeJSnumow3uzDRWRWt1IAKj6KI"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

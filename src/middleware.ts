@@ -50,7 +50,7 @@ export async function middleware(request: NextRequest) {
       if (role === "staff") return NextResponse.redirect(new URL("/staff", request.url));
       if (role === "author") return NextResponse.redirect(new URL("/author", request.url));
     }
-    return response;
+    return NextResponse.redirect(new URL("/login", request.url));
   }
 
   // Redirect old login routes to unified /login

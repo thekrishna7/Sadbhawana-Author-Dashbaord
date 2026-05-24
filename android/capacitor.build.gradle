@@ -1,0 +1,4 @@
+// This file is used by Capacitor to include plugins as dependencies.
+// If you have no plugins, this file can be empty.
+dependencies {
+}
