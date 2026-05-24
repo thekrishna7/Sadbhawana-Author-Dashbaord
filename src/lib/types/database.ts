@@ -61,11 +61,16 @@ export interface Sales {
   copies_sold: number;
   website_sales: number;
   amazon_sales: number;
+  /** Monthly breakdown e.g. { "January-February": 5, "March-April": 2 } */
+  amazon_sales_monthly: Record<string, number>;
+  /** Monthly breakdown e.g. { "January-February": 3 } */
+  website_sales_monthly: Record<string, number>;
   monthly_revenue: number;
   total_revenue: number;
   ranking: number | null;
   royalty_earned: number | null;
   last_royalty_credit_at: string | null;
+  updated_by: string | null;
   updated_at: string;
 }
 

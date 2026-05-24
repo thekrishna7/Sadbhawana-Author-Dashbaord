@@ -63,6 +63,18 @@ export async function resolveFileUrl(
   return data.signedUrl;
 }
 
+/** Resolve file_url via API route to bypass RLS restrictions */
+export async function resolveFileUrlViaApi(bucket: StorageBucket, path: string): Promise<string> {
+  const response = await fetch("/api/storage/signed-url", {
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    body: JSON.stringify({ bucket, path }),
+  });
+  if (!response.ok) throw new Error("Failed to fetch signed URL");
+  const { signedUrl } = await response.json();
+  return signedUrl;
+}
+
 export function storageRef(bucket: StorageBucket, path: string) {
   return `${bucket}:${path}`;
 }

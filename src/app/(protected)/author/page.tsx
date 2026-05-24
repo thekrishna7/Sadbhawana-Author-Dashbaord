@@ -6,7 +6,7 @@ import { GlassCard } from "@/components/ui/glass-card";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/toast";
 import { sendNotification } from "@/lib/notifications";
-import { uploadPrivate, resolveFileUrl, storageRef, parseStorageRef } from "@/lib/storage";
+import { uploadPrivate, resolveFileUrlViaApi, storageRef, parseStorageRef } from "@/lib/storage";
 import type { Profile, Book } from "@/lib/types/database";
 import { Upload, Download, FileText, X, Loader2, Eye, FileUp, Sparkles, FolderDown, FileCheck, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
@@ -254,11 +254,12 @@ export default function AuthorDashboardPage() {
     try {
       const ref = parseStorageRef(doc.file_url);
       const url = ref
-        ? await resolveFileUrl(ref.path, ref.bucket)
-        : await resolveFileUrl(doc.file_url, "documents");
+        ? await resolveFileUrlViaApi(ref.bucket, ref.path)
+        : await resolveFileUrlViaApi("documents", doc.file_url);
       window.open(url, "_blank");
-    } catch {
-      toast.error("Failed to download file.");
+    } catch (err: any) {
+      console.error("Download error:", err);
+      toast.error(err.message || "Failed to download file.");
     }
   };
 
@@ -267,8 +268,8 @@ export default function AuthorDashboardPage() {
     try {
       const ref = parseStorageRef(doc.file_url);
       const url = ref
-        ? await resolveFileUrl(ref.path, ref.bucket)
-        : await resolveFileUrl(doc.file_url, "documents");
+        ? await resolveFileUrlViaApi(ref.bucket, ref.path)
+        : await resolveFileUrlViaApi("documents", doc.file_url);
 
       const isImage = /\.(png|jpe?g|webp|svg)$/i.test(doc.file_name);
       const isPdf = /\.pdf$/i.test(doc.file_name);
@@ -279,8 +280,9 @@ export default function AuthorDashboardPage() {
         isImage,
         isPdf,
       });
-    } catch {
-      toast.error("Failed to generate file preview.");
+    } catch (err: any) {
+      console.error("Preview error:", err);
+      toast.error(err.message || "Failed to generate file preview.");
     } finally {
       setResolvingPreviewId(null);
     }
