@@ -125,7 +125,7 @@ function LoginPageContent() {
     } else {
       router.push("/");
     }
-    
+
     router.refresh();
   }
 
@@ -142,7 +142,7 @@ function LoginPageContent() {
         body: JSON.stringify({ action: "send-otp", identifier: forgotIdentifier }),
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || "Failed to request code");
       }
@@ -169,7 +169,7 @@ function LoginPageContent() {
         body: JSON.stringify({ action: "verify-otp", email: forgotEmail, otp: forgotOtp }),
       });
       const data = await res.json();
-      
+
       if (!res.ok) {
         throw new Error(data.error || "Failed to verify code");
       }
@@ -251,7 +251,7 @@ function LoginPageContent() {
               Sadbhawana Publication
             </h2>
             <p className="text-[10px] font-bold tracking-[0.2em] text-amber-500 uppercase">
-              Private Publishing Companion
+              Logi Your Author's Dashbaord
             </p>
           </div>
         </div>
