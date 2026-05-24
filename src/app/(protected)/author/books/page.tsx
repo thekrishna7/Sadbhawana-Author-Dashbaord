@@ -7,12 +7,14 @@ import { PUBLISHING_STAGES } from "@/lib/constants";
 import type { Profile, Book, Sales } from "@/lib/types/database";
 import { ChevronRight, BookOpen, X, Loader2, BarChart2, Coins } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useRealtimeTable } from "@/hooks/use-realtime";
 
 export default function AuthorBooksPage() {
   const [profile, setProfile] = useState<Profile | null>(null);
   const [books, setBooks] = useState<(Book & { sales?: any })[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedBook, setSelectedBook] = useState<(Book & { sales?: any }) | null>(null);
+  const [breakdownType, setBreakdownType] = useState<"amazon" | "website" | null>(null);
 
   const supabase = createClient();
 
@@ -42,6 +44,9 @@ export default function AuthorBooksPage() {
   useEffect(() => {
     loadBooks();
   }, [loadBooks]);
+
+  useRealtimeTable("books", null, loadBooks);
+  useRealtimeTable("sales", null, loadBooks);
 
   const getStageLabel = (stageKey: string) => {
     const stage = PUBLISHING_STAGES.find((s) => s.key === stageKey);
@@ -161,7 +166,7 @@ export default function AuthorBooksPage() {
                     <h2 className="text-base font-bold text-white truncate font-serif mt-0.5">{selectedBook.title}</h2>
                   </div>
                   <button
-                    onClick={() => setSelectedBook(null)}
+                    onClick={() => { setSelectedBook(null); setBreakdownType(null); }}
                     className="rounded-full bg-white/5 p-1.5 text-zinc-400 hover:text-white transition shrink-0"
                   >
                     <X className="h-4 w-4" />
@@ -170,16 +175,92 @@ export default function AuthorBooksPage() {
 
                 {/* Sales Figure Cards */}
                 <div className="space-y-4">
-                  {/* Website sales */}
-                  <div className="flex justify-between items-center p-3.5 rounded-2xl border border-white/5 bg-white/2">
-                    <span className="text-xs text-zinc-400 font-medium">Website Sold</span>
-                    <span className="text-sm font-extrabold text-white font-mono">{websiteSold}</span>
+                  {/* Website sales (Clickable Card) */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setBreakdownType(breakdownType === "website" ? null : "website")}
+                      className={`w-full flex justify-between items-center p-3.5 rounded-2xl border transition-all ${
+                        breakdownType === "website"
+                          ? "border-amber-500/30 bg-amber-500/5 text-amber-500"
+                          : "border-white/5 bg-white/2 hover:border-amber-500/20 text-zinc-400"
+                      }`}
+                    >
+                      <span className="text-xs font-medium">Website Sold</span>
+                      <span className="text-sm font-extrabold text-white font-mono">{websiteSold}</span>
+                    </button>
+                    
+                    {/* Expandable Website Monthly Breakdown */}
+                    {breakdownType === "website" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden rounded-2xl border border-white/5 bg-black/40 p-3.5 space-y-2"
+                      >
+                        <p className="text-[9px] font-bold text-zinc-550 uppercase tracking-wider mb-1 border-b border-white/5 pb-1 text-left">Month-wise Website Sales</p>
+                        {(() => {
+                          const websiteSalesMonthly = (sales as any)?.website_sales_monthly ?? {};
+                          return Object.keys(websiteSalesMonthly).length === 0 ? (
+                            <p className="text-[10px] text-zinc-600 italic text-left">No monthly breakdown available.</p>
+                          ) : (
+                            Object.entries(websiteSalesMonthly).map(([month, count]) => (
+                              <div key={month} className="flex justify-between items-center text-xs">
+                                <span className="text-zinc-400">{month}</span>
+                                <span className="font-semibold text-white font-mono">{count} sales</span>
+                              </div>
+                            ))
+                          );
+                        })()}
+                        <div className="flex justify-between items-center text-[10px] font-bold text-amber-500 border-t border-white/5 pt-2 mt-1">
+                          <span>Total Website Sales</span>
+                          <span className="font-mono">{websiteSold}</span>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
 
-                  {/* Amazon sales */}
-                  <div className="flex justify-between items-center p-3.5 rounded-2xl border border-white/5 bg-white/2">
-                    <span className="text-xs text-zinc-400 font-medium">Amazon Sold</span>
-                    <span className="text-sm font-extrabold text-white font-mono">{amazonSold}</span>
+                  {/* Amazon sales (Clickable Card) */}
+                  <div className="space-y-2">
+                    <button
+                      onClick={() => setBreakdownType(breakdownType === "amazon" ? null : "amazon")}
+                      className={`w-full flex justify-between items-center p-3.5 rounded-2xl border transition-all ${
+                        breakdownType === "amazon"
+                          ? "border-amber-500/30 bg-amber-500/5 text-amber-500"
+                          : "border-white/5 bg-white/2 hover:border-amber-500/20 text-zinc-400"
+                      }`}
+                    >
+                      <span className="text-xs font-medium">Amazon Sold</span>
+                      <span className="text-sm font-extrabold text-white font-mono">{amazonSold}</span>
+                    </button>
+                    
+                    {/* Expandable Amazon Monthly Breakdown */}
+                    {breakdownType === "amazon" && (
+                      <motion.div
+                        initial={{ height: 0, opacity: 0 }}
+                        animate={{ height: "auto", opacity: 1 }}
+                        exit={{ height: 0, opacity: 0 }}
+                        className="overflow-hidden rounded-2xl border border-white/5 bg-black/40 p-3.5 space-y-2"
+                      >
+                        <p className="text-[9px] font-bold text-zinc-555 uppercase tracking-wider mb-1 border-b border-white/5 pb-1 text-left">Month-wise Amazon Sales</p>
+                        {(() => {
+                          const amazonSalesMonthly = (sales as any)?.amazon_sales_monthly ?? {};
+                          return Object.keys(amazonSalesMonthly).length === 0 ? (
+                            <p className="text-[10px] text-zinc-600 italic text-left">No monthly breakdown available.</p>
+                          ) : (
+                            Object.entries(amazonSalesMonthly).map(([month, count]) => (
+                              <div key={month} className="flex justify-between items-center text-xs">
+                                <span className="text-zinc-400">{month}</span>
+                                <span className="font-semibold text-white font-mono">{count} sales</span>
+                              </div>
+                            ))
+                          );
+                        })()}
+                        <div className="flex justify-between items-center text-[10px] font-bold text-amber-500 border-t border-white/5 pt-2 mt-1">
+                          <span>Total Amazon Sales</span>
+                          <span className="font-mono">{amazonSold}</span>
+                        </div>
+                      </motion.div>
+                    )}
                   </div>
 
                   {/* Total sales */}
@@ -191,7 +272,7 @@ export default function AuthorBooksPage() {
                 </div>
 
                 <button
-                  onClick={() => setSelectedBook(null)}
+                  onClick={() => { setSelectedBook(null); setBreakdownType(null); }}
                   className="mt-6 w-full rounded-2xl bg-white hover:bg-zinc-200 py-3 font-semibold text-xs text-black uppercase tracking-wider transition"
                 >
                   Close Report

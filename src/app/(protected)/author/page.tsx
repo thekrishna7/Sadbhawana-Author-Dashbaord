@@ -8,7 +8,7 @@ import { useToast } from "@/components/ui/toast";
 import { sendNotification } from "@/lib/notifications";
 import { uploadPrivate, resolveFileUrl, storageRef, parseStorageRef } from "@/lib/storage";
 import type { Profile, Book } from "@/lib/types/database";
-import { Upload, Download, FileText, X, Loader2, Eye, FileUp, Sparkles, FolderDown, FileCheck } from "lucide-react";
+import { Upload, Download, FileText, X, Loader2, Eye, FileUp, Sparkles, FolderDown, FileCheck, Trash2 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 
 export default function AuthorDashboardPage() {
@@ -21,6 +21,11 @@ export default function AuthorDashboardPage() {
   const [showUpload, setShowUpload] = useState(false);
   const [showDownload, setShowDownload] = useState(false);
 
+  // Modal active tabs
+  const [activeUploadTab, setActiveUploadTab] = useState<"upload" | "history">("upload");
+  const [activeDownloadTab, setActiveDownloadTab] = useState<"download" | "history">("download");
+  const [historySubTab, setHistorySubTab] = useState<"author" | "admin">("author");
+
   // Upload fields state
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
   const [docTitle, setDocTitle] = useState("");
@@ -31,6 +36,14 @@ export default function AuthorDashboardPage() {
   // Shared documents state
   const [sharedDocs, setSharedDocs] = useState<any[]>([]);
   const [loadingShared, setLoadingShared] = useState(false);
+
+  // Uploaded documents state (author's own uploads)
+  const [uploadedDocs, setUploadedDocs] = useState<any[]>([]);
+  const [loadingUploaded, setLoadingUploaded] = useState(false);
+
+  // File deletion state
+  const [deletingFile, setDeletingFile] = useState<any | null>(null);
+  const [confirmDeleteShow, setConfirmDeleteShow] = useState(false);
 
   // Document preview state
   const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; isImage: boolean; isPdf: boolean } | null>(null);
@@ -86,9 +99,10 @@ export default function AuthorDashboardPage() {
     try {
       const { data, error } = await supabase
         .from("documents")
-        .select("*, uploader:profiles!uploaded_by(full_name)")
+        .select("*, uploader:profiles!uploaded_by(full_name), book:books(title)")
         .eq("author_id", profile.id)
         .neq("uploaded_by", profile.id)
+        .eq("deleted_by_author", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -101,12 +115,62 @@ export default function AuthorDashboardPage() {
     }
   }, [profile, supabase, toast]);
 
-  // Trigger loading shared documents when modal opens
-  useEffect(() => {
-    if (showDownload && profile) {
-      loadSharedDocs();
+  // Load documents uploaded by this author
+  const loadUploadedDocs = useCallback(async () => {
+    if (!profile) return;
+    setLoadingUploaded(true);
+    try {
+      const { data, error } = await supabase
+        .from("documents")
+        .select("*, uploader:profiles!uploaded_by(full_name), book:books(title)")
+        .eq("uploaded_by", profile.id)
+        .eq("deleted_by_author", false)
+        .order("created_at", { ascending: false });
+
+      if (error) throw error;
+      setUploadedDocs(data ?? []);
+    } catch (err: any) {
+      console.error("Failed to load author uploaded files:", err);
+    } finally {
+      setLoadingUploaded(false);
     }
-  }, [showDownload, profile, loadSharedDocs]);
+  }, [profile, supabase]);
+
+  // Trigger loading documents when modals open
+  useEffect(() => {
+    if (profile) {
+      if (showUpload) {
+        loadUploadedDocs();
+        loadSharedDocs();
+      }
+      if (showDownload) {
+        loadSharedDocs();
+      }
+    }
+  }, [showUpload, showDownload, profile, loadUploadedDocs, loadSharedDocs]);
+
+  // Soft Delete Handler
+  const handleConfirmDelete = async () => {
+    if (!deletingFile) return;
+    try {
+      const { error } = await supabase
+        .from("documents")
+        .update({ deleted_by_author: true })
+        .eq("id", deletingFile.id);
+
+      if (error) throw error;
+      toast.success("File removed from history.");
+      setConfirmDeleteShow(false);
+      setDeletingFile(null);
+      
+      // Reload details
+      loadUploadedDocs();
+      loadSharedDocs();
+    } catch (err: any) {
+      console.error("Delete history error:", err);
+      toast.error("Failed to remove file from history.");
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -318,9 +382,9 @@ export default function AuthorDashboardPage() {
               exit={{ scale: 0.95, opacity: 0 }}
               className="w-full max-w-md overflow-hidden rounded-3xl border border-white/10 bg-[#09090b] p-6 shadow-2xl relative"
             >
-              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-5">
+              <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4">
                 <div>
-                  <h3 className="text-base font-bold text-white">Upload Document</h3>
+                  <h3 className="text-base font-bold text-white">Upload Documents</h3>
                   <p className="text-[10px] text-zinc-500 mt-0.5">Send a file securely to the Sadbhawana editors.</p>
                 </div>
                 <button
@@ -330,6 +394,7 @@ export default function AuthorDashboardPage() {
                     setDocTitle("");
                     setSelectedBookId("");
                     setDocCategory("other");
+                    setActiveUploadTab("upload");
                   }}
                   className="rounded-full bg-white/5 p-1.5 text-zinc-400 hover:text-white transition"
                 >
@@ -337,107 +402,225 @@ export default function AuthorDashboardPage() {
                 </button>
               </div>
 
-              <form onSubmit={handleUploadSubmit} className="space-y-4">
-                {/* File Drop Area */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Select File</label>
-                  {selectedFile ? (
-                    <div className="flex items-center justify-between p-3.5 rounded-2xl border border-white/10 bg-white/3 font-medium">
-                      <div className="flex items-center gap-2 overflow-hidden mr-2">
-                        <FileText className="h-5 w-5 text-amber-500 shrink-0" />
-                        <div className="overflow-hidden">
-                          <p className="text-xs text-white truncate font-semibold">{selectedFile.name}</p>
-                          <p className="text-[9px] text-zinc-500 mt-0.5">{formatBytes(selectedFile.size)}</p>
-                        </div>
-                      </div>
-                      <button
-                        type="button"
-                        onClick={() => setSelectedFile(null)}
-                        className="rounded-full bg-white/5 p-1 text-zinc-400 hover:text-white transition"
-                      >
-                        <X className="h-3.5 w-3.5" />
-                      </button>
-                    </div>
-                  ) : (
-                    <label className="flex flex-col items-center justify-center p-6 rounded-2xl border border-dashed border-white/15 bg-white/1 hover:bg-white/3 cursor-pointer transition text-zinc-500 hover:text-zinc-300">
-                      <Upload className="h-5 w-5 mb-1.5 text-amber-500" />
-                      <span className="text-xs font-semibold">Select PDF, Word, or image file</span>
-                      <input
-                        type="file"
-                        className="hidden"
-                        accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.webp"
-                        required
-                        onChange={handleFileChange}
-                      />
-                    </label>
-                  )}
-                </div>
-
-                {/* Document Title */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Document Title</label>
-                  <input
-                    type="text"
-                    required
-                    placeholder="Enter document title"
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
-                    value={docTitle}
-                    onChange={(e) => setDocTitle(e.target.value)}
-                  />
-                </div>
-
-                {/* Book Linkage */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Associate with Book (Optional)</label>
-                  <select
-                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
-                    value={selectedBookId}
-                    onChange={(e) => setSelectedBookId(e.target.value)}
-                  >
-                    <option value="">General Publication File</option>
-                    {books.map((b) => (
-                      <option key={b.id} value={b.id}>
-                        {b.title}
-                      </option>
-                    ))}
-                  </select>
-                </div>
-
-                {/* Category */}
-                <div className="space-y-1.5">
-                  <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Category</label>
-                  <select
-                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
-                    value={docCategory}
-                    onChange={(e) => setDocCategory(e.target.value)}
-                  >
-                    <option value="other">Manuscript Draft</option>
-                    <option value="agreement">Agreement / Contract</option>
-                    <option value="other">Book Cover Concept</option>
-                    <option value="royalty_statement">Royalty Statement</option>
-                    <option value="invoice">Invoice / Bill</option>
-                    <option value="isbn_certificate">ISBN Document</option>
-                    <option value="contract">Contract</option>
-                    <option value="other">Other Document</option>
-                  </select>
-                </div>
-
+              {/* Tab Navigation */}
+              <div className="flex gap-2 mb-4 border-b border-white/5 pb-2 shrink-0">
                 <button
-                  type="submit"
-                  disabled={uploading || !selectedFile}
-                  className="w-full rounded-2xl bg-white hover:bg-zinc-200 py-3.5 text-xs font-bold text-black uppercase tracking-wider transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  type="button"
+                  onClick={() => setActiveUploadTab("upload")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    activeUploadTab === "upload"
+                      ? "bg-white text-black shadow-md"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
                 >
-                  {uploading ? (
-                    <>
-                      <Loader2 className="h-4 w-4 animate-spin" /> Uploading to HQ…
-                    </>
-                  ) : (
-                    <>
-                      <Upload className="h-4 w-4" /> Upload Document
-                    </>
-                  )}
+                  Upload File
                 </button>
-              </form>
+                <button
+                  type="button"
+                  onClick={() => setActiveUploadTab("history")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    activeUploadTab === "history"
+                      ? "bg-white text-black shadow-md"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Past Uploaded Files
+                </button>
+              </div>
+
+              {activeUploadTab === "upload" ? (
+                <form onSubmit={handleUploadSubmit} className="space-y-4">
+                  {/* File Drop Area */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Select File</label>
+                    {selectedFile ? (
+                      <div className="flex items-center justify-between p-3.5 rounded-2xl border border-white/10 bg-white/3 font-medium">
+                        <div className="flex items-center gap-2 overflow-hidden mr-2">
+                          <FileText className="h-5 w-5 text-amber-500 shrink-0" />
+                          <div className="overflow-hidden">
+                            <p className="text-xs text-white truncate font-semibold">{selectedFile.name}</p>
+                            <p className="text-[9px] text-zinc-500 mt-0.5">{formatBytes(selectedFile.size)}</p>
+                          </div>
+                        </div>
+                        <button
+                          type="button"
+                          onClick={() => setSelectedFile(null)}
+                          className="rounded-full bg-white/5 p-1 text-zinc-400 hover:text-white transition"
+                        >
+                          <X className="h-3.5 w-3.5" />
+                        </button>
+                      </div>
+                    ) : (
+                      <label className="flex flex-col items-center justify-center p-6 rounded-2xl border border-dashed border-white/15 bg-white/1 hover:bg-white/3 cursor-pointer transition text-zinc-500 hover:text-zinc-300">
+                        <Upload className="h-5 w-5 mb-1.5 text-amber-500" />
+                        <span className="text-xs font-semibold">Select PDF, Word, or image file</span>
+                        <input
+                          type="file"
+                          className="hidden"
+                          accept=".pdf,.docx,.doc,.png,.jpg,.jpeg,.webp"
+                          required
+                          onChange={handleFileChange}
+                        />
+                      </label>
+                    )}
+                  </div>
+
+                  {/* Document Title */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Document Title</label>
+                    <input
+                      type="text"
+                      required
+                      placeholder="Enter document title"
+                      className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                      value={docTitle}
+                      onChange={(e) => setDocTitle(e.target.value)}
+                    />
+                  </div>
+
+                  {/* Book Linkage */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Associate with Book (Optional)</label>
+                    <select
+                      className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                      value={selectedBookId}
+                      onChange={(e) => setSelectedBookId(e.target.value)}
+                    >
+                      <option value="">General Publication File</option>
+                      {books.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.title}
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Category */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Category</label>
+                    <select
+                      className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                      value={docCategory}
+                      onChange={(e) => setDocCategory(e.target.value)}
+                    >
+                      <option value="other">Manuscript Draft</option>
+                      <option value="agreement">Agreement / Contract</option>
+                      <option value="other">Book Cover Concept</option>
+                      <option value="royalty_statement">Royalty Statement</option>
+                      <option value="invoice">Invoice / Bill</option>
+                      <option value="isbn_certificate">ISBN Document</option>
+                      <option value="contract">Contract</option>
+                      <option value="other">Other Document</option>
+                    </select>
+                  </div>
+
+                  <button
+                    type="submit"
+                    disabled={uploading || !selectedFile}
+                    className="w-full rounded-2xl bg-white hover:bg-zinc-200 py-3.5 text-xs font-bold text-black uppercase tracking-wider transition disabled:opacity-50 flex items-center justify-center gap-2 mt-2"
+                  >
+                    {uploading ? (
+                      <>
+                        <Loader2 className="h-4 w-4 animate-spin" /> Uploading to HQ…
+                      </>
+                    ) : (
+                      <>
+                        <Upload className="h-4 w-4" /> Upload Document
+                      </>
+                    )}
+                  </button>
+                </form>
+              ) : (
+                <div className="flex flex-col max-h-[50vh]">
+                  {/* Sub-tabs for Author vs Admin Uploaded Files */}
+                  <div className="flex gap-2 mb-3 bg-white/5 p-1 rounded-xl shrink-0">
+                    <button
+                      type="button"
+                      onClick={() => setHistorySubTab("author")}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
+                        historySubTab === "author" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                      }`}
+                    >
+                      Author Uploaded Files
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setHistorySubTab("admin")}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
+                        historySubTab === "admin" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                      }`}
+                    >
+                      Admin Uploaded Files
+                    </button>
+                  </div>
+
+                  {/* List Container */}
+                  <div className="flex-grow overflow-y-auto space-y-3 py-1 pr-1">
+                    {(() => {
+                      const files = historySubTab === "author" ? uploadedDocs : sharedDocs;
+                      const loadingFiles = historySubTab === "author" ? loadingUploaded : loadingShared;
+                      
+                      if (loadingFiles) {
+                        return (
+                          <div className="flex flex-col items-center justify-center py-10 text-zinc-550 gap-2">
+                            <Loader2 className="h-4 w-4 animate-spin text-amber-500" />
+                            <span className="text-[10px]">Loading history...</span>
+                          </div>
+                        );
+                      }
+                      
+                      if (files.length === 0) {
+                        return (
+                          <p className="text-xs text-zinc-500 italic text-center py-10">No past uploaded files in this history.</p>
+                        );
+                      }
+
+                      return files.map((doc) => (
+                        <div key={doc.id} className="p-3.5 rounded-2xl border border-white/5 bg-white/2 hover:border-amber-500/10 transition-all flex flex-col justify-between gap-3">
+                          <div className="flex items-start justify-between gap-2">
+                            <div className="min-w-0">
+                              <p className="font-bold text-white text-xs truncate">{doc.title}</p>
+                              <p className="text-[9px] text-zinc-500 truncate mt-0.5 font-mono">{doc.file_name}</p>
+                            </div>
+                            <span className="text-[8px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 shrink-0 capitalize">
+                              {doc.category.replace(/_/g, " ")}
+                            </span>
+                          </div>
+
+                          {doc.book?.title && (
+                            <p className="text-[9px] text-zinc-400">
+                              Book: <span className="text-zinc-300 font-semibold">{doc.book.title}</span>
+                            </p>
+                          )}
+
+                          <div className="flex justify-between items-center text-[9px] text-zinc-500 border-t border-white/5 pt-2 mt-1">
+                            <div>
+                              <p>Time: {new Date(doc.created_at).toLocaleString()}</p>
+                              <p className="mt-0.5">By: {doc.uploaded_by === profile.id ? "You" : "Admin"}</p>
+                            </div>
+                            <div className="flex items-center gap-2">
+                              <span className="text-[8px] font-mono border border-white/10 bg-white/5 px-1.5 py-0.5 rounded text-zinc-400">
+                                {doc.status || "Uploaded"}
+                              </span>
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeletingFile(doc);
+                                  setConfirmDeleteShow(true);
+                                }}
+                                className="p-1.5 rounded-lg border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/20 transition shrink-0"
+                                title="Remove from History"
+                              >
+                                <Trash2 className="h-3.5 w-3.5" />
+                              </button>
+                            </div>
+                          </div>
+                        </div>
+                      ));
+                    })()}
+                  </div>
+                </div>
+              )}
             </motion.div>
           </div>
         )}
@@ -455,14 +638,43 @@ export default function AuthorDashboardPage() {
             >
               <div className="flex items-center justify-between border-b border-white/5 pb-4 mb-4 shrink-0">
                 <div>
-                  <h3 className="text-base font-bold text-white">Files Shared by HQ</h3>
-                  <p className="text-[10px] text-zinc-500 mt-0.5">Documents uploaded by the publishing team.</p>
+                  <h3 className="text-base font-bold text-white">Download Vault</h3>
+                  <p className="text-[10px] text-zinc-500 mt-0.5">Documents shared by headquarters.</p>
                 </div>
                 <button
-                  onClick={() => setShowDownload(false)}
+                  onClick={() => {
+                    setShowDownload(false);
+                    setActiveDownloadTab("download");
+                  }}
                   className="rounded-full bg-white/5 p-1.5 text-zinc-400 hover:text-white transition"
                 >
                   <X className="h-4 w-4" />
+                </button>
+              </div>
+
+              {/* Tab Navigation */}
+              <div className="flex gap-2 mb-4 border-b border-white/5 pb-2 shrink-0">
+                <button
+                  type="button"
+                  onClick={() => setActiveDownloadTab("download")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    activeDownloadTab === "download"
+                      ? "bg-white text-black shadow-md"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Available Files
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setActiveDownloadTab("history")}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
+                    activeDownloadTab === "history"
+                      ? "bg-white text-black shadow-md"
+                      : "text-zinc-400 hover:text-white"
+                  }`}
+                >
+                  Past Downloaded Files
                 </button>
               </div>
 
@@ -476,61 +688,87 @@ export default function AuthorDashboardPage() {
                 ) : sharedDocs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-zinc-500 text-center space-y-2">
                     <FileCheck className="h-8 w-8 text-zinc-700" />
-                    <p className="text-xs font-semibold">No shared files found</p>
-                    <p className="text-[10px] text-zinc-600 max-w-[240px]">
+                    <p className="text-xs font-semibold">No files found</p>
+                    <p className="text-[10px] text-zinc-650 max-w-[240px]">
                       Documents shared by headquarters will automatically appear here.
                     </p>
                   </div>
                 ) : (
-                  sharedDocs.map((doc) => {
-                    const previewable = /\.(pdf|png|jpe?g|webp|svg)$/i.test(doc.file_name);
-                    
-                    return (
-                      <div
-                        key={doc.id}
-                        className="p-4 rounded-2xl border border-white/5 bg-white/2 hover:border-amber-500/10 transition-all flex flex-col justify-between space-y-4"
-                      >
-                        <div className="flex items-start justify-between gap-3">
-                          <div className="min-w-0">
-                            <p className="font-bold text-white text-sm truncate">{doc.title}</p>
-                            <p className="text-[10px] text-zinc-500 truncate mt-0.5 font-mono">{doc.file_name}</p>
-                          </div>
-                          <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 shrink-0 capitalize">
-                            {doc.category.replace(/_/g, " ")}
-                          </span>
-                        </div>
-
-                        <div className="flex justify-between items-center text-[10px] text-zinc-500 border-t border-white/5 pt-2">
-                          <span>Size: {formatBytes(doc.file_size)}</span>
-                          <span>Shared: {new Date(doc.created_at).toLocaleDateString()}</span>
-                        </div>
-
-                        <div className="flex gap-2">
-                          {previewable && (
-                            <button
-                              onClick={() => handlePreviewFile(doc)}
-                              disabled={resolvingPreviewId === doc.id}
-                              className="flex-1 flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 transition disabled:opacity-50"
-                            >
-                              {resolvingPreviewId === doc.id ? (
-                                <Loader2 className="h-3.5 w-3.5 animate-spin" />
-                              ) : (
-                                <Eye className="h-3.5 w-3.5" />
-                              )}
-                              Preview
-                            </button>
-                          )}
-                          <button
-                            onClick={() => handleDownloadFile(doc)}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 py-2 text-xs font-bold text-amber-500 hover:bg-amber-500/20 transition"
-                          >
-                            <Download className="h-3.5 w-3.5" />
-                            Download
-                          </button>
-                        </div>
+                  <div className="space-y-4">
+                    {activeDownloadTab === "history" && (
+                      <div className="text-[9px] font-bold text-zinc-500 uppercase tracking-wider mb-2 border-b border-white/5 pb-1">
+                        FILES FROM ADMIN
                       </div>
-                    );
-                  })
+                    )}
+                    {sharedDocs.map((doc) => {
+                      const previewable = /\.(pdf|png|jpe?g|webp|svg)$/i.test(doc.file_name);
+                      
+                      return (
+                        <div
+                          key={doc.id}
+                          className="p-4 rounded-2xl border border-white/5 bg-white/2 hover:border-amber-500/10 transition-all flex flex-col justify-between space-y-4"
+                        >
+                          <div className="flex items-start justify-between gap-3">
+                            <div className="min-w-0">
+                              <p className="font-bold text-white text-sm truncate">{doc.title}</p>
+                              <p className="text-[10px] text-zinc-500 truncate mt-0.5 font-mono">{doc.file_name}</p>
+                            </div>
+                            <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 shrink-0 capitalize">
+                              {doc.category.replace(/_/g, " ")}
+                            </span>
+                          </div>
+
+                          {doc.book?.title && (
+                            <p className="text-[10px] text-zinc-450">
+                              Book: <span className="text-zinc-300 font-semibold">{doc.book.title}</span>
+                            </p>
+                          )}
+
+                          <div className="flex justify-between items-center text-[10px] text-zinc-500 border-t border-white/5 pt-2">
+                            <span>Size: {formatBytes(doc.file_size)}</span>
+                            <span>Shared: {new Date(doc.created_at).toLocaleDateString()}</span>
+                          </div>
+
+                          <div className="flex gap-2">
+                            {previewable && (
+                              <button
+                                onClick={() => handlePreviewFile(doc)}
+                                disabled={resolvingPreviewId === doc.id}
+                                className="flex-grow flex items-center justify-center gap-1.5 rounded-xl border border-white/10 bg-white/5 py-2 text-xs font-semibold text-zinc-300 hover:bg-white/10 transition disabled:opacity-50"
+                              >
+                                {resolvingPreviewId === doc.id ? (
+                                  <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                                ) : (
+                                  <Eye className="h-3.5 w-3.5" />
+                                )}
+                                Preview
+                              </button>
+                            )}
+                            <button
+                              onClick={() => handleDownloadFile(doc)}
+                              className="flex-grow flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 py-2 text-xs font-bold text-amber-500 hover:bg-amber-500/20 transition"
+                            >
+                              <Download className="h-3.5 w-3.5" />
+                              Download
+                            </button>
+                            {activeDownloadTab === "history" && (
+                              <button
+                                type="button"
+                                onClick={() => {
+                                  setDeletingFile(doc);
+                                  setConfirmDeleteShow(true);
+                                }}
+                                className="p-2 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/20 transition shrink-0"
+                                title="Remove from History"
+                              >
+                                <Trash2 className="h-4 w-4" />
+                              </button>
+                            )}
+                          </div>
+                        </div>
+                      );
+                    })}
+                  </div>
                 )}
               </div>
             </motion.div>
@@ -592,6 +830,44 @@ export default function AuthorDashboardPage() {
                     <p className="text-[10px] text-zinc-600 mt-1">Please download this document to review its content.</p>
                   </div>
                 )}
+              </div>
+            </motion.div>
+          </div>
+        )}
+      </AnimatePresence>
+
+      {/* ── FILE DELETE CONFIRMATION MODAL ────────────────────────────────────── */}
+      <AnimatePresence>
+        {confirmDeleteShow && deletingFile && (
+          <div className="fixed inset-0 z-[100] flex items-center justify-center bg-black/85 backdrop-blur-sm p-4">
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0 }}
+              animate={{ scale: 1, opacity: 1 }}
+              exit={{ scale: 0.95, opacity: 0 }}
+              className="w-full max-w-sm rounded-3xl border border-red-500/20 bg-zinc-950 p-6 shadow-2xl relative"
+            >
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
+              <h3 className="text-base font-bold text-red-400 mb-2">Remove File from History</h3>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-6">
+                Are you sure you want to remove <span className="text-white font-semibold">"{deletingFile.title}"</span> from history?
+                This will only remove the record from your dashboard visibility. The actual file is safe and will not be destroyed.
+              </p>
+              <div className="flex gap-3 justify-end">
+                <button
+                  onClick={() => {
+                    setConfirmDeleteShow(false);
+                    setDeletingFile(null);
+                  }}
+                  className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-zinc-400 hover:text-white"
+                >
+                  Cancel
+                </button>
+                <button
+                  onClick={handleConfirmDelete}
+                  className="px-4 py-2 rounded-xl bg-red-650 hover:bg-red-500 text-xs font-bold text-white transition"
+                >
+                  Yes, Remove
+                </button>
               </div>
             </motion.div>
           </div>

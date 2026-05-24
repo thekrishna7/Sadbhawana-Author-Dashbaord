@@ -62,6 +62,16 @@ export async function GET() {
             ADD COLUMN IF NOT EXISTS last_login_at timestamp with time zone,
             ADD COLUMN IF NOT EXISTS device_login_history jsonb DEFAULT '[]'::jsonb,
             ADD COLUMN IF NOT EXISTS two_factor_secret text;
+
+          ALTER TABLE sales 
+            ADD COLUMN IF NOT EXISTS website_sales_monthly jsonb NOT NULL DEFAULT '{}'::jsonb,
+            ADD COLUMN IF NOT EXISTS amazon_sales_monthly jsonb NOT NULL DEFAULT '{}'::jsonb;
+
+          ALTER TABLE documents 
+            ADD COLUMN IF NOT EXISTS deleted_by_author boolean NOT NULL DEFAULT false,
+            ADD COLUMN IF NOT EXISTS deleted_by_admin boolean NOT NULL DEFAULT false,
+            ADD COLUMN IF NOT EXISTS downloaded_by_author boolean NOT NULL DEFAULT false,
+            ADD COLUMN IF NOT EXISTS downloaded_by_admin boolean NOT NULL DEFAULT false;
         `;
         const res = await client.query(sql);
         queryResult = res;
