@@ -112,6 +112,7 @@ export function AuthorShell({
   const navItems = [
     { href: "/author", label: "Home", icon: Home },
     { href: "/author/books", label: "Books", icon: BookOpen },
+    { href: "/author/notifications", label: "Notifications", icon: Bell, badge: unreadNotifications },
     { href: "/author/profile", label: "Profile", icon: User },
   ];
 
@@ -167,10 +168,10 @@ export function AuthorShell({
         </main>
 
         {/* Bottom Navigation Menu */}
-        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-[#050508]/95 backdrop-blur-md py-3.5 px-6 flex justify-around items-center max-w-xl mx-auto shadow-2xl">
+        <nav className="fixed bottom-0 left-0 right-0 z-40 border-t border-white/5 bg-[#050508]/95 backdrop-blur-md py-3.5 px-4 flex justify-around items-center max-w-xl mx-auto shadow-2xl">
           {navItems.map((item) => {
             const Icon = item.icon;
-            const isActive = pathname === item.href;
+            const isActive = pathname === item.href || (item.href !== "/author" && pathname.startsWith(item.href));
             
             return (
               <Link

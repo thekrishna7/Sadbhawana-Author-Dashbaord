@@ -156,10 +156,10 @@ export default function AdminProfilePage() {
     router.refresh();
   };
 
-  if (!profile) {
+  if (loading || !profile) {
     return (
       <div className="min-h-screen bg-[#030303] text-zinc-100 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
       </div>
     );
   }
@@ -186,16 +186,16 @@ export default function AdminProfilePage() {
                 <Image src={profile.avatar_url} alt={profile.full_name} fill className="object-cover" />
               </div>
             ) : (
-              <div className="h-28 w-28 rounded-full bg-violet-500/10 border-2 border-dashed border-violet-500/20 flex items-center justify-center text-4xl font-serif text-violet-300 font-bold">
+              <div className="h-28 w-28 rounded-full bg-amber-500/10 border-2 border-dashed border-amber-500/20 flex items-center justify-center text-4xl font-serif text-amber-500 font-bold">
                 {profile.full_name?.charAt(0) || "A"}
               </div>
             )}
 
-            <label className="absolute bottom-1 right-1 cursor-pointer h-8 w-8 rounded-full bg-violet-600 flex items-center justify-center text-white border-2 border-[#050508] shadow-lg hover:scale-105 transition-all">
+            <label className="absolute bottom-1 right-1 cursor-pointer h-8 w-8 rounded-full bg-amber-500 flex items-center justify-center text-black border-2 border-[#030303] shadow-lg hover:scale-105 transition-all">
               {uploadingAvatar ? (
-                <Loader2 className="h-4 w-4 animate-spin text-white" />
+                <Loader2 className="h-4 w-4 animate-spin text-black" />
               ) : (
-                <Camera className="h-4 w-4" />
+                <Camera className="h-4 w-4 text-black" />
               )}
               <input type="file" accept="image/*" className="hidden" disabled={uploadingAvatar} onChange={handleUploadAvatar} />
             </label>
@@ -219,7 +219,7 @@ export default function AdminProfilePage() {
                 required
                 value={name}
                 onChange={(e) => setName(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                 placeholder="Full name"
               />
             </div>
@@ -235,7 +235,7 @@ export default function AdminProfilePage() {
                 required
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                 placeholder="Email address"
               />
             </div>
@@ -250,7 +250,7 @@ export default function AdminProfilePage() {
                 type="tel"
                 value={phone}
                 onChange={(e) => setPhone(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                 placeholder="Phone number"
               />
             </div>
@@ -282,7 +282,7 @@ export default function AdminProfilePage() {
                 required
                 value={newPassword}
                 onChange={(e) => setNewPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                 placeholder="Minimum 8 characters"
               />
             </div>
@@ -298,7 +298,7 @@ export default function AdminProfilePage() {
                 required
                 value={confirmPassword}
                 onChange={(e) => setConfirmPassword(e.target.value)}
-                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 py-3.5 pl-11 pr-4 text-xs text-white placeholder:text-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                 placeholder="Re-enter password"
               />
             </div>

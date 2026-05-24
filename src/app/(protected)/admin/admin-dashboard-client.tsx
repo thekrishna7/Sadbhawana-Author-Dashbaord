@@ -2,17 +2,13 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
-import { MetricCard } from "@/components/ui/metric-card";
 import { GlassCard } from "@/components/ui/glass-card";
-import { ADMIN_NAV } from "@/lib/constants";
 import { createClient } from "@/lib/supabase/client";
 import { useToast } from "@/components/ui/toast";
 import { useRealtimeTable } from "@/hooks/use-realtime";
 import { uploadPrivate, resolveFileUrl, storageRef, parseStorageRef } from "@/lib/storage";
 import type { Profile } from "@/lib/types/database";
 import {
-  Users,
-  BookOpen,
   Upload,
   Download,
   FileText,
@@ -216,62 +212,76 @@ export function AdminDashboardClient({
   };
 
   return (
-    <DashboardShell
-      nav={ADMIN_NAV}
-      profile={profile}
-      brand="Author Dashboard"
-      title="Overview"
-      subtitle="Real-time publishing operations at HQ"
-    >
-      {/* Top Stats */}
-      <div className="grid gap-6 md:grid-cols-2">
-        <MetricCard label="Total Authors" value={stats.authors} icon={Users} trend="Active roster" />
-        <MetricCard label="Total Books" value={stats.books} icon={BookOpen} trend="Catalogued workspaces" />
-      </div>
+    <DashboardShell title="Workspace">
+      <div className="space-y-8 flex-grow flex flex-col justify-center">
+        {/* Welcome Section */}
+        <div className="space-y-2">
+          <h2 className="text-2xl font-bold text-white font-serif tracking-tight">
+            Welcome Back, Admin 👋
+          </h2>
+          <p className="text-sm text-zinc-500">
+            Publishing workspace is active.
+          </p>
+        </div>
 
-      {/* Upload & Download Action Cards */}
-      <div className="grid gap-6 md:grid-cols-2 mt-8">
-        {/* Card A: Upload Files */}
-        <GlassCard className="p-8 flex flex-col justify-between hover:border-violet-500/20 transition-all duration-300 relative overflow-hidden" hover={true} glow>
-          <div className="space-y-4">
-            <div className="h-12 w-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-400">
-              <FileUp className="h-6 w-6" />
-            </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">Upload Files</h3>
-              <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
-                Send contracts, manuscripts, cover layout files, or ISBN certifications directly to specific authors.
-              </p>
-            </div>
+        {/* Small Simple Stats */}
+        <div className="grid grid-cols-2 gap-4">
+          <div className="rounded-2xl border border-white/5 bg-[#09090b]/80 p-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-8 h-8 bg-amber-500/5 rounded-full blur-[15px]" />
+            <p className="text-2xl font-bold text-white font-mono">{stats.authors}</p>
+            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">Total Authors</p>
           </div>
-          <button
-            onClick={() => setShowUpload(true)}
-            className="mt-8 w-full flex items-center justify-center gap-2 rounded-2xl bg-white hover:bg-zinc-200 py-4 text-xs font-bold text-black uppercase tracking-wider transition-all"
-          >
-            Upload File
-          </button>
-        </GlassCard>
+          <div className="rounded-2xl border border-white/5 bg-[#09090b]/80 p-4 relative overflow-hidden">
+            <div className="absolute top-0 right-0 w-8 h-8 bg-amber-500/5 rounded-full blur-[15px]" />
+            <p className="text-2xl font-bold text-white font-mono">{stats.books}</p>
+            <p className="text-[10px] text-zinc-500 uppercase font-bold tracking-wider mt-0.5">Total Books</p>
+          </div>
+        </div>
 
-        {/* Card B: Download Files */}
-        <GlassCard className="p-8 flex flex-col justify-between hover:border-violet-500/20 transition-all duration-300 relative overflow-hidden" hover={true} glow>
-          <div className="space-y-4">
-            <div className="h-12 w-12 rounded-2xl bg-violet-500/10 flex items-center justify-center text-violet-400">
-              <FolderDown className="h-6 w-6" />
+        {/* Home Cards Grid */}
+        <div className="grid gap-6">
+          {/* Card A: Upload Files */}
+          <GlassCard className="p-6! border-white/5 bg-[#09090b]/80 flex flex-col justify-between hover:border-amber-500/10 transition-all duration-300 relative overflow-hidden" hover={true}>
+            <div className="space-y-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <FileUp className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Upload Files</h3>
+                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  Send files to publishing team
+                </p>
+              </div>
             </div>
-            <div>
-              <h3 className="text-xl font-bold text-white">Download Files</h3>
-              <p className="text-sm text-zinc-500 mt-2 leading-relaxed">
-                Access files uploaded by authors including raw manuscripts, sign-offs, and other submission media.
-              </p>
+            <button
+              onClick={() => setShowUpload(true)}
+              className="mt-6 w-full flex items-center justify-center gap-2 rounded-2xl bg-white hover:bg-zinc-200 py-3.5 text-xs font-bold text-black uppercase tracking-wider transition-all"
+            >
+              Upload File
+            </button>
+          </GlassCard>
+
+          {/* Card B: Download Files */}
+          <GlassCard className="p-6! border-white/5 bg-[#09090b]/80 flex flex-col justify-between hover:border-amber-500/10 transition-all duration-300 relative overflow-hidden" hover={true}>
+            <div className="space-y-4">
+              <div className="h-10 w-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-500">
+                <FolderDown className="h-5 w-5" />
+              </div>
+              <div>
+                <h3 className="text-lg font-bold text-white">Download Files</h3>
+                <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
+                  Files shared by admin team
+                </p>
+              </div>
             </div>
-          </div>
-          <button
-            onClick={() => setShowDownload(true)}
-            className="mt-8 w-full flex items-center justify-center gap-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 py-4 text-xs font-bold text-white uppercase tracking-wider transition-all"
-          >
-            Download Files
-          </button>
-        </GlassCard>
+            <button
+              onClick={() => setShowDownload(true)}
+              className="mt-6 w-full flex items-center justify-center gap-2 rounded-2xl bg-zinc-900 hover:bg-zinc-800 border border-white/10 py-3.5 text-xs font-bold text-white uppercase tracking-wider transition-all"
+            >
+              Download Files
+            </button>
+          </GlassCard>
+        </div>
       </div>
 
       {/* ── UPLOAD MODAL ──────────────────────────────────────────────────────── */}
@@ -310,7 +320,7 @@ export function AdminDashboardClient({
                   {selectedFile ? (
                     <div className="flex items-center justify-between p-3.5 rounded-2xl border border-white/10 bg-white/3 font-medium">
                       <div className="flex items-center gap-2 overflow-hidden mr-2">
-                        <FileText className="h-5 w-5 text-violet-400 shrink-0" />
+                        <FileText className="h-5 w-5 text-amber-500 shrink-0" />
                         <div className="overflow-hidden">
                           <p className="text-xs text-white truncate font-semibold">{selectedFile.name}</p>
                           <p className="text-[9px] text-zinc-500 mt-0.5">{formatBytes(selectedFile.size)}</p>
@@ -326,7 +336,7 @@ export function AdminDashboardClient({
                     </div>
                   ) : (
                     <label className="flex flex-col items-center justify-center p-6 rounded-2xl border border-dashed border-white/15 bg-white/1 hover:bg-white/3 cursor-pointer transition text-zinc-500 hover:text-zinc-300">
-                      <Upload className="h-5 w-5 mb-1.5 text-violet-400" />
+                      <Upload className="h-5 w-5 mb-1.5 text-amber-500" />
                       <span className="text-xs font-semibold">Select PDF, Word, or image file</span>
                       <input
                         type="file"
@@ -346,7 +356,7 @@ export function AdminDashboardClient({
                     type="text"
                     required
                     placeholder="Enter document title"
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-750 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={docTitle}
                     onChange={(e) => setDocTitle(e.target.value)}
                   />
@@ -357,7 +367,7 @@ export function AdminDashboardClient({
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Assign to Author</label>
                   <select
                     required
-                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={selectedAuthorId}
                     onChange={(e) => setSelectedAuthorId(e.target.value)}
                   >
@@ -374,7 +384,7 @@ export function AdminDashboardClient({
                 <div className="space-y-1.5">
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Category</label>
                   <select
-                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={docCategory}
                     onChange={(e) => setDocCategory(e.target.value)}
                   >
@@ -435,14 +445,14 @@ export function AdminDashboardClient({
               <div className="flex-grow overflow-y-auto space-y-3 pr-1 py-1">
                 {loadingShared ? (
                   <div className="flex flex-col items-center justify-center py-12 text-zinc-500 gap-2">
-                    <Loader2 className="h-5 w-5 animate-spin text-violet-450" />
+                    <Loader2 className="h-5 w-5 animate-spin text-amber-500" />
                     <span className="text-xs">Fetching vault...</span>
                   </div>
                 ) : sharedDocs.length === 0 ? (
                   <div className="flex flex-col items-center justify-center py-12 text-zinc-500 text-center space-y-2">
                     <FileCheck className="h-8 w-8 text-zinc-700" />
                     <p className="text-xs font-semibold">No uploaded files found</p>
-                    <p className="text-[10px] text-zinc-650 max-w-[240px]">
+                    <p className="text-[10px] text-zinc-600 max-w-[240px]">
                       Documents uploaded by authors will automatically appear here.
                     </p>
                   </div>
@@ -453,17 +463,17 @@ export function AdminDashboardClient({
                     return (
                       <div
                         key={doc.id}
-                        className="p-4 rounded-2xl border border-white/5 bg-white/2 hover:border-violet-500/10 transition-all flex flex-col justify-between space-y-4"
+                        className="p-4 rounded-2xl border border-white/5 bg-white/2 hover:border-amber-500/10 transition-all flex flex-col justify-between space-y-4"
                       >
                         <div className="flex items-start justify-between gap-3">
                           <div className="min-w-0">
                             <p className="font-bold text-white text-sm truncate">{doc.title}</p>
                             <p className="text-[10px] text-zinc-400 truncate mt-0.5">
-                              By: <span className="text-violet-300 font-semibold">{doc.uploader?.full_name ?? "Author"}</span>
+                              By: <span className="text-amber-500 font-semibold">{doc.uploader?.full_name ?? "Author"}</span>
                             </p>
-                            <p className="text-[9px] text-zinc-600 truncate mt-0.5 font-mono">{doc.file_name}</p>
+                            <p className="text-[9px] text-zinc-650 truncate mt-0.5 font-mono">{doc.file_name}</p>
                           </div>
-                          <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border border-violet-500/20 bg-violet-500/5 text-violet-400 shrink-0 capitalize">
+                          <span className="text-[9px] font-extrabold uppercase tracking-wider px-2 py-0.5 rounded-full border border-amber-500/20 bg-amber-500/5 text-amber-500 shrink-0 capitalize">
                             {doc.category.replace(/_/g, " ")}
                           </span>
                         </div>
@@ -490,7 +500,7 @@ export function AdminDashboardClient({
                           )}
                           <button
                             onClick={() => handleDownloadFile(doc)}
-                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-violet-500/10 border border-violet-500/25 py-2 text-xs font-bold text-violet-400 hover:bg-violet-500/20 transition"
+                            className="flex-1 flex items-center justify-center gap-1.5 rounded-xl bg-amber-500/10 border border-amber-500/25 py-2 text-xs font-bold text-amber-500 hover:bg-amber-500/20 transition"
                           >
                             <Download className="h-3.5 w-3.5" />
                             Download
@@ -557,7 +567,7 @@ export function AdminDashboardClient({
                 ) : (
                   <div className="text-center py-10 text-zinc-500">
                     <p className="font-semibold text-xs text-white">No direct preview available</p>
-                    <p className="text-[10px] text-zinc-650 mt-1">Please download this document to review its content.</p>
+                    <p className="text-[10px] text-zinc-600 mt-1">Please download this document to review its content.</p>
                   </div>
                 )}
               </div>

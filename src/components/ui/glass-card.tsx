@@ -23,7 +23,7 @@ export function GlassCard({
       onClick={onClick}
       className={cn(
         "glass rounded-3xl p-8 text-left w-full",
-        glow && "glow-violet",
+        glow && "glow-gold",
         hover && "transition-all duration-300 hover:border-white/12 hover:shadow-xl",
         className
       )}

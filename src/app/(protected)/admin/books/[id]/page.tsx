@@ -142,7 +142,7 @@ export default function AdminBookDetailsPage() {
   if (loading || !profile) {
     return (
       <div className="min-h-screen bg-[#030303] text-zinc-100 flex items-center justify-center">
-        <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+        <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
       </div>
     );
   }
@@ -152,7 +152,7 @@ export default function AdminBookDetailsPage() {
       <DashboardShell nav={ADMIN_NAV} profile={profile} brand="Author Dashboard" title="Book Details">
         <div className="text-center py-20 text-zinc-500">
           <p className="text-base font-semibold">Book not found.</p>
-          <Link href="/admin/books" className="text-violet-400 hover:text-violet-300 mt-4 inline-block text-sm">
+          <Link href="/admin/books" className="text-amber-500 hover:text-amber-400 mt-4 inline-block text-sm">
             Back to Catalog
           </Link>
         </div>
@@ -179,7 +179,7 @@ export default function AdminBookDetailsPage() {
         {/* Book Header Card */}
         <GlassCard className="p-6 flex flex-col gap-2" hover={false} glow>
           <div className="flex items-center gap-2">
-            <span className="font-mono text-[9px] font-bold text-violet-400 border border-violet-500/20 bg-violet-500/5 px-2 py-0.5 rounded-md">
+            <span className="font-mono text-[9px] font-bold text-amber-400 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 rounded-md">
               {book.serial_number}
             </span>
             <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
@@ -195,14 +195,14 @@ export default function AdminBookDetailsPage() {
           </h2>
           {book.subtitle && <p className="text-xs text-zinc-500">{book.subtitle}</p>}
           <p className="text-xs text-zinc-400">
-            Author: <span className="text-violet-300 font-semibold">{book.author?.full_name ?? "Unknown Author"}</span>
+            Author: <span className="text-amber-500 font-semibold">{book.author?.full_name ?? "Unknown Author"}</span>
           </p>
         </GlassCard>
 
         {/* Sales Stats Panel */}
         <form onSubmit={handleSave} className="space-y-5">
           <GlassCard className="p-6 space-y-6" hover={false}>
-            <div className="flex items-center gap-2 text-violet-400 font-semibold">
+            <div className="flex items-center gap-2 text-amber-500 font-semibold">
               <BarChart3 className="h-5 w-5" />
               <h3>Editable Sales Statistics</h3>
             </div>
@@ -217,7 +217,7 @@ export default function AdminBookDetailsPage() {
                 type="number"
                 min="0"
                 placeholder="0"
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold font-mono"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold font-mono"
                 value={amazonSales}
                 onChange={(e) => setAmazonSales(Math.max(0, parseInt(e.target.value) || 0))}
               />
@@ -233,20 +233,20 @@ export default function AdminBookDetailsPage() {
                 type="number"
                 min="0"
                 placeholder="0"
-                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-zinc-700 focus:outline-none focus:border-violet-500/30 transition-all font-semibold font-mono"
+                className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3.5 text-sm text-white placeholder-zinc-700 focus:outline-none focus:border-amber-500/30 transition-all font-semibold font-mono"
                 value={websiteSales}
                 onChange={(e) => setWebsiteSales(Math.max(0, parseInt(e.target.value) || 0))}
               />
             </div>
 
             {/* Calculated Total (Read Only) */}
-            <div className="p-4 rounded-2xl border border-violet-500/10 bg-violet-500/5 relative overflow-hidden flex justify-between items-center">
-              <div className="absolute top-0 right-0 w-12 h-12 bg-violet-500/5 rounded-full blur-[20px] pointer-events-none" />
+            <div className="p-4 rounded-2xl border border-amber-500/10 bg-amber-500/5 relative overflow-hidden flex justify-between items-center">
+              <div className="absolute top-0 right-0 w-12 h-12 bg-amber-500/5 rounded-full blur-[20px] pointer-events-none" />
               <div>
-                <p className="text-xs text-violet-400 font-bold uppercase tracking-wider">Total Copies Sold</p>
+                <p className="text-xs text-amber-500 font-bold uppercase tracking-wider">Total Copies Sold</p>
                 <p className="text-[9px] text-zinc-500 mt-0.5">Automatically calculated: Amazon + Website</p>
               </div>
-              <span className="text-xl font-black text-violet-400 font-mono">{calculatedTotal}</span>
+              <span className="text-xl font-black text-amber-500 font-mono">{calculatedTotal}</span>
             </div>
           </GlassCard>
 

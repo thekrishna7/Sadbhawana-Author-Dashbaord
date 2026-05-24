@@ -59,7 +59,7 @@ export function ToastProvider({ children }: { children: React.ReactNode }) {
                 ? "border-emerald-500/20 bg-emerald-500/10 text-emerald-300"
                 : t.type === "error"
                 ? "border-red-500/20 bg-red-500/10 text-red-300"
-                : "border-violet-500/20 bg-violet-500/10 text-violet-300";
+                : "border-amber-500/20 bg-amber-500/10 text-amber-300";
 
             return (
               <motion.div

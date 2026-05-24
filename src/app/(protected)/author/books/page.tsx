@@ -91,23 +91,28 @@ export default function AuthorBooksPage() {
             <div
               key={book.id}
               onClick={() => setSelectedBook(book)}
-              className="p-5 rounded-2xl border border-white/5 bg-[#09090b]/60 hover:border-amber-500/10 cursor-pointer flex items-center justify-between transition-all duration-300 group"
+              className="p-5 rounded-2xl border border-white/5 bg-[#09090b]/80 flex items-center justify-between group hover:border-amber-500/20 transition duration-300 cursor-pointer"
             >
-              <div className="space-y-2 min-w-0 mr-4">
+              <div className="min-w-0 flex-1 mr-4 space-y-1">
+                <div className="flex items-center gap-2 flex-wrap">
+                  <span className="font-mono text-[10px] font-bold text-amber-400 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 rounded-md">
+                    {book.serial_number}
+                  </span>
+                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
+                    book.book_type === "not_for_sell"
+                      ? "text-orange-400 bg-orange-500/10 border-orange-500/20"
+                      : "text-emerald-400 bg-emerald-500/10 border-emerald-500/20"
+                  }`}>
+                    {book.book_type === "not_for_sell" ? "Not For Sale" : "Sell Book"}
+                  </span>
+                </div>
                 <h3 className="font-bold text-white text-base truncate font-serif leading-snug group-hover:text-amber-400 transition-colors">
                   {book.title}
                 </h3>
-                <div className="flex items-center gap-2">
-                  <span className={`text-[9px] font-bold uppercase tracking-wider px-2.5 py-0.5 rounded-full border ${getStageColorClass(book.current_stage)}`}>
-                    {getStageLabel(book.current_stage)}
-                  </span>
-                  <span className="text-[10px] text-zinc-500">
-                    {book.progress_percent}% progress
-                  </span>
-                </div>
+                {book.subtitle && <p className="text-xs text-zinc-500 truncate">{book.subtitle}</p>}
               </div>
 
-              <div className="h-9 w-9 rounded-xl border border-white/5 bg-white/2 flex items-center justify-center text-zinc-500 group-hover:text-amber-500 group-hover:border-amber-500/20 transition-all shrink-0">
+              <div className="h-10 w-10 rounded-xl border border-white/5 bg-white/2 flex items-center justify-center text-zinc-500 group-hover:text-amber-400 group-hover:border-amber-500/20 transition-all shrink-0">
                 <ChevronRight className="h-4 w-4" />
               </div>
             </div>

@@ -258,7 +258,7 @@ export default function AuthorDashboardPage() {
             Welcome Back, {profile.full_name.split(" ")[0]} 👋
           </h2>
           <p className="text-sm text-zinc-500">
-            Your private secure publishing workspace is active.
+            Your publishing workspace is ready.
           </p>
         </div>
 
@@ -273,7 +273,7 @@ export default function AuthorDashboardPage() {
               <div>
                 <h3 className="text-lg font-bold text-white">Upload Files</h3>
                 <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                  Send manuscripts, cover ideas, royalty requests, or agreement scans to the editorial team.
+                  Send files to publishing team
                 </p>
               </div>
             </div>
@@ -294,7 +294,7 @@ export default function AuthorDashboardPage() {
               <div>
                 <h3 className="text-lg font-bold text-white">Download Files</h3>
                 <p className="text-xs text-zinc-500 mt-1 leading-relaxed">
-                  Access signed contracts, invoices, distribution statements, or edited layouts shared by HQ.
+                  Files shared by admin team
                 </p>
               </div>
             </div>

@@ -206,7 +206,7 @@ export default function AdminBooksPage() {
       actions={
         <button
           onClick={openCreateModal}
-          className="flex items-center gap-2 rounded-2xl bg-violet-600 px-5 py-2.5 text-sm font-semibold text-white shadow-lg shadow-violet-600/20 hover:bg-violet-500 transition"
+          className="flex items-center gap-2 rounded-2xl bg-amber-500 px-5 py-2.5 text-sm font-bold text-black shadow-lg shadow-amber-500/20 hover:bg-amber-400 transition"
         >
           <Plus className="h-4 w-4" /> Add New Book
         </button>
@@ -235,7 +235,7 @@ export default function AdminBooksPage() {
           value={search}
           onChange={(e) => setSearch(e.target.value)}
           placeholder="Search by book title, author name, or serial number..."
-          className="w-full rounded-2xl border border-white/10 bg-white/5 py-3.5 pl-11 pr-4 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-violet-500/60 focus:ring-1 focus:ring-violet-500/30 focus:shadow-lg focus:shadow-violet-900/20 transition-all font-semibold"
+          className="w-full rounded-2xl border border-white/10 bg-white/5 py-3.5 pl-11 pr-4 text-sm text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/60 focus:ring-1 focus:ring-amber-500/30 focus:shadow-lg focus:shadow-amber-900/20 transition-all font-semibold"
         />
         {search && (
           <button
@@ -250,7 +250,7 @@ export default function AdminBooksPage() {
       {/* Books Listing */}
       {loading ? (
         <div className="flex items-center justify-center py-20">
-          <Loader2 className="h-8 w-8 animate-spin text-violet-500" />
+          <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
         </div>
       ) : filteredBooks.length === 0 ? (
         <div className="flex flex-col items-center justify-center py-16 text-zinc-500 border border-dashed border-white/10 rounded-3xl">
@@ -263,11 +263,11 @@ export default function AdminBooksPage() {
           {filteredBooks.map((book) => (
             <div
               key={book.id}
-              className="p-5 rounded-2xl border border-white/5 bg-[#09090b]/80 flex items-center justify-between group hover:border-violet-500/20 transition duration-300"
+              className="p-5 rounded-2xl border border-white/5 bg-[#09090b]/80 flex items-center justify-between group hover:border-amber-500/20 transition duration-300"
             >
               <div className="min-w-0 flex-1 mr-4 space-y-1">
                 <div className="flex items-center gap-2 flex-wrap">
-                  <span className="font-mono text-[10px] font-bold text-violet-400 border border-violet-500/20 bg-violet-500/5 px-2 py-0.5 rounded-md">
+                  <span className="font-mono text-[10px] font-bold text-amber-400 border border-amber-500/20 bg-amber-500/5 px-2 py-0.5 rounded-md">
                     {book.serial_number}
                   </span>
                   <span className={`text-[9px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full border ${
@@ -278,7 +278,7 @@ export default function AdminBooksPage() {
                     {book.book_type === "not_for_sell" ? "Not For Sale" : "Sell Book"}
                   </span>
                 </div>
-                <h3 className="font-bold text-white text-base truncate font-serif leading-snug group-hover:text-violet-300 transition-colors">
+                <h3 className="font-bold text-white text-base truncate font-serif leading-snug group-hover:text-amber-400 transition-colors">
                   {book.title}
                 </h3>
                 {book.subtitle && <p className="text-xs text-zinc-500 truncate">{book.subtitle}</p>}
@@ -297,7 +297,7 @@ export default function AdminBooksPage() {
                 </button>
                 <Link
                   href={`/admin/books/${book.id}`}
-                  className="h-10 w-10 rounded-xl border border-white/5 bg-white/2 flex items-center justify-center text-zinc-500 group-hover:text-violet-400 group-hover:border-violet-500/20 transition-all"
+                  className="h-10 w-10 rounded-xl border border-white/5 bg-white/2 flex items-center justify-center text-zinc-500 group-hover:text-amber-400 group-hover:border-amber-500/20 transition-all"
                 >
                   <ArrowRight className="h-4 w-4" />
                 </Link>
@@ -344,7 +344,7 @@ export default function AdminBooksPage() {
                   <input
                     required
                     placeholder="Enter book title"
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={form.title}
                     onChange={(e) => setForm((f) => ({ ...f, title: e.target.value }))}
                   />
@@ -355,7 +355,7 @@ export default function AdminBooksPage() {
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Subtitle</label>
                   <input
                     placeholder="Enter subtitle (optional)"
-                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-black/40 px-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={form.subtitle}
                     onChange={(e) => setForm((f) => ({ ...f, subtitle: e.target.value }))}
                   />
@@ -369,7 +369,7 @@ export default function AdminBooksPage() {
                     <input
                       required
                       placeholder="SBP-0001"
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 pl-11 pr-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-violet-500/30 transition-all font-mono uppercase"
+                      className="w-full rounded-2xl border border-white/10 bg-black/40 pl-11 pr-4 py-3 text-xs text-white placeholder-zinc-705 focus:outline-none focus:border-amber-500/30 transition-all font-mono uppercase"
                       value={form.serial_number}
                       onChange={(e) => setForm((f) => ({ ...f, serial_number: e.target.value.toUpperCase() }))}
                     />
@@ -383,7 +383,7 @@ export default function AdminBooksPage() {
                     <Calendar className="absolute left-4 top-1/2 -translate-y-1/2 h-3.5 w-3.5 text-zinc-500" />
                     <input
                       type="date"
-                      className="w-full rounded-2xl border border-white/10 bg-black/40 pl-11 pr-4 py-3 text-xs text-white focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                      className="w-full rounded-2xl border border-white/10 bg-black/40 pl-11 pr-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                       value={form.launch_date}
                       onChange={(e) => setForm((f) => ({ ...f, launch_date: e.target.value }))}
                     />
@@ -424,7 +424,7 @@ export default function AdminBooksPage() {
                   <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Assign Author</label>
                   <select
                     required
-                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-violet-500/30 transition-all font-semibold"
+                    className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
                     value={form.author_id}
                     onChange={(e) => setForm((f) => ({ ...f, author_id: e.target.value }))}
                   >
