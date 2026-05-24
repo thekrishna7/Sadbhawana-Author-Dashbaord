@@ -7,6 +7,7 @@ import { Home, BookOpen, Bell, User, Loader2, LogOut } from "lucide-react";
 import { createClient } from "@/lib/supabase/client";
 import type { Profile } from "@/lib/types/database";
 import Image from "next/image";
+import { motion } from "framer-motion";
 
 export function AuthorShell({
   children,
