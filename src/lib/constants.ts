@@ -24,7 +24,7 @@ export const ADMIN_NAV = [
   { href: "/admin", label: "Overview", icon: "LayoutDashboard" },
   { href: "/admin/authors", label: "Authors", icon: "Users" },
   { href: "/admin/books", label: "Books", icon: "BookOpen" },
-  { href: "/admin/profile", label: "Profile Settings", icon: "User" },
+  { href: "/admin/profile", label: "Profile", icon: "User" },
 ] as const;
 
 export const AUTHOR_NAV = [

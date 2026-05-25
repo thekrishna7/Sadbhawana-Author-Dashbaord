@@ -102,7 +102,6 @@ export default function AuthorDashboardPage() {
         .select("*, uploader:profiles!uploaded_by(full_name), book:books(title)")
         .eq("author_id", profile.id)
         .neq("uploaded_by", profile.id)
-        .eq("deleted_by_author", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -124,7 +123,6 @@ export default function AuthorDashboardPage() {
         .from("documents")
         .select("*, uploader:profiles!uploaded_by(full_name), book:books(title)")
         .eq("uploaded_by", profile.id)
-        .eq("deleted_by_author", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -149,17 +147,17 @@ export default function AuthorDashboardPage() {
     }
   }, [showUpload, showDownload, profile, loadUploadedDocs, loadSharedDocs]);
 
-  // Soft Delete Handler
+  // File Deletion Handler (Deletes the record from the database completely)
   const handleConfirmDelete = async () => {
     if (!deletingFile) return;
     try {
       const { error } = await supabase
         .from("documents")
-        .update({ deleted_by_author: true })
+        .delete()
         .eq("id", deletingFile.id);
 
       if (error) throw error;
-      toast.success("File removed from history.");
+      toast.success("File deleted from history.");
       setConfirmDeleteShow(false);
       setDeletingFile(null);
       
@@ -167,8 +165,8 @@ export default function AuthorDashboardPage() {
       loadUploadedDocs();
       loadSharedDocs();
     } catch (err: any) {
-      console.error("Delete history error:", err);
-      toast.error("Failed to remove file from history.");
+      console.error("Delete file error:", err);
+      toast.error("Failed to delete file from history.");
     }
   };
 

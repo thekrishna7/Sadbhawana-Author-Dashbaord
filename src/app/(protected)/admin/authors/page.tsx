@@ -1,35 +1,52 @@
 "use client";
 
 import { useState, useEffect, useCallback, useMemo } from "react";
-import Link from "next/link";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { GlassCard } from "@/components/ui/glass-card";
 import { CreateUserModal } from "@/components/admin/create-user-modal";
 import { createClient } from "@/lib/supabase/client";
-import { useToast } from "@/components/ui/toast";
-import { Plus, Search, X, Trash2, Loader2, User, Phone, Mail, Edit2 } from "lucide-react";
+import { ADMIN_NAV } from "@/lib/constants";
+import { getInitials } from "@/lib/utils";
+import { useRealtimeTable } from "@/hooks/use-realtime";
+import type { Profile } from "@/lib/types/database";
+import { Plus, Search, X, Trash2, Loader2, Users, Mail, Phone } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
+import { useToast } from "@/components/ui/toast";
+import { Skeleton } from "@/components/ui/skeleton";
+import { EmptyState } from "@/components/ui/empty-state";
 
 export default function AdminAuthorsPage() {
   const supabase = createClient();
   const toast = useToast();
-  const [profile, setProfile] = useState<any | null>(null);
-  const [authors, setAuthors] = useState<any[]>([]);
+  const [profile, setProfile] = useState<Profile | null>(null);
+  const [authors, setAuthors] = useState<Profile[]>([]);
   const [search, setSearch] = useState("");
   const [modal, setModal] = useState(false);
-  const [deletingAuthor, setDeletingAuthor] = useState<any | null>(null);
+  const [deletingUserItem, setDeletingUserItem] = useState<Profile | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
   const [loading, setLoading] = useState(true);
 
-  const load = useCallback(async () => {
-    const { data } = await supabase
-      .from("profiles")
-      .select("*, books(*)")
-      .eq("role", "author")
-      .order("created_at", { ascending: false });
-    setAuthors(data ?? []);
-    setLoading(false);
-  }, [supabase]);
+  async function handleDeleteUser() {
+    if (!deletingUserItem) return;
+    setIsDeleting(true);
+    try {
+      const res = await fetch("/api/admin/delete-user", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ userId: deletingUserItem.id }),
+      });
+      const data = await res.json();
+      if (!res.ok) throw new Error(data.error || "Failed to delete author");
+
+      toast.success(`Author "${deletingUserItem.full_name}" deleted successfully.`);
+      setDeletingUserItem(null);
+      load();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Failed to delete author.");
+    } finally {
+      setIsDeleting(false);
+    }
+  }
 
   useEffect(() => {
     supabase.auth.getUser().then(({ data }) => {
@@ -39,26 +56,25 @@ export default function AdminAuthorsPage() {
           .select("*")
           .eq("id", data.user.id)
           .single()
-          .then(({ data }) => setProfile(data));
+          .then(({ data }) => setProfile(data as Profile));
     });
-    load();
-  }, [supabase, load]);
+  }, [supabase]);
 
-  // Sync realtime
+  const load = useCallback(async () => {
+    const { data } = await supabase
+      .from("profiles")
+      .select("*")
+      .eq("role", "author")
+      .order("created_at", { ascending: false });
+    setAuthors((data as Profile[]) ?? []);
+    setLoading(false);
+  }, [supabase]);
+
   useEffect(() => {
-    const channel = supabase
-      .channel("admin-authors-realtime")
-      .on(
-        "postgres_changes",
-        { event: "*", schema: "public", table: "profiles" },
-        () => load()
-      )
-      .subscribe();
+    load();
+  }, [load]);
 
-    return () => {
-      supabase.removeChannel(channel);
-    };
-  }, [supabase, load]);
+  useRealtimeTable("profiles", null, load);
 
   const filtered = useMemo(() => {
     const q = search.trim().toLowerCase();
@@ -71,177 +87,172 @@ export default function AdminAuthorsPage() {
     );
   }, [authors, search]);
 
-  const handleDeleteUser = async () => {
-    if (!deletingAuthor) return;
-    setIsDeleting(true);
-    try {
-      const res = await fetch("/api/admin/delete-user", {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ userId: deletingAuthor.id }),
-      });
-      const data = await res.json();
-      if (!res.ok) throw new Error(data.error || "Failed to delete author");
-
-      toast.success(`Author "${deletingAuthor.full_name}" deleted.`);
-      setDeletingAuthor(null);
-      load();
-    } catch (err: any) {
-      toast.error(err.message || "Failed to delete author.");
-    } finally {
-      setIsDeleting(false);
-    }
-  };
-
   if (!profile) return null;
 
   return (
     <DashboardShell
+      nav={ADMIN_NAV}
+      profile={profile}
+      brand="Author Dashboard"
       title="Authors"
+      subtitle="Manage publication creator access and database profiles"
       actions={
         <button
           onClick={() => setModal(true)}
-          className="flex items-center gap-2 rounded-2xl bg-amber-500 hover:bg-amber-600 px-4 py-2.5 text-xs font-bold text-black transition"
+          className="flex items-center gap-2 rounded-2xl bg-white hover:bg-zinc-200 px-5 py-2.5 text-xs font-bold text-black uppercase tracking-wider transition"
         >
           <Plus className="h-4 w-4" /> Add Author
         </button>
       }
     >
-      <div className="space-y-6 flex-grow flex flex-col">
-        {/* Header */}
-        <div className="flex justify-between items-center shrink-0">
-          <div className="space-y-1">
-            <h2 className="text-xl font-bold text-white font-serif">Authors Directory</h2>
-            <p className="text-xs text-zinc-500">Manage author rosters and workspace login access.</p>
-          </div>
-          <button
-            onClick={() => setModal(true)}
-            className="flex items-center gap-1.5 text-xs font-bold text-amber-500 hover:text-amber-400 transition"
-          >
-            <Plus className="h-4 w-4" /> Add Author
-          </button>
-        </div>
-
-        {/* Search */}
-        <div className="relative">
+      {/* Search and stats bar */}
+      <div className="flex flex-wrap items-center justify-between gap-4 border-b border-white/5 pb-4 mb-6">
+        <div className="relative flex-1 max-w-md">
           <Search className="absolute left-4 top-1/2 h-4 w-4 -translate-y-1/2 text-zinc-500 pointer-events-none" />
           <input
             value={search}
             onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search by author name, email, or phone..."
-            className="w-full rounded-2xl border border-white/10 bg-white/5 py-3.5 pl-11 pr-4 text-sm text-white placeholder-zinc-650 focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+            placeholder="Search by name, email, or mobile..."
+            className="w-full rounded-2xl border border-white/10 bg-white/5 py-3 pl-11 pr-4 text-xs text-white placeholder-zinc-600 focus:outline-none focus:border-amber-500/30 focus:ring-1 focus:ring-amber-500/10 transition-all font-semibold"
           />
           {search && (
             <button
               onClick={() => setSearch("")}
-              className="absolute right-4 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
+              className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-500 hover:text-white"
             >
               <X className="h-4 w-4" />
             </button>
           )}
         </div>
-
-        {/* List */}
-        {loading ? (
-          <div className="flex items-center justify-center py-20">
-            <Loader2 className="h-8 w-8 animate-spin text-amber-500" />
-          </div>
-        ) : filtered.length === 0 ? (
-          <div className="flex flex-col items-center justify-center py-16 text-zinc-500 border border-dashed border-white/10 rounded-3xl">
-            <User className="h-10 w-10 text-zinc-700 mb-2" />
-            <p className="text-sm font-semibold">No authors found</p>
-            <p className="text-xs text-zinc-600 mt-1">Add a new author user to get started.</p>
-          </div>
-        ) : (
-          <div className="space-y-4">
-            {filtered.map((author) => (
-              <div
-                key={author.id}
-                className="p-5 rounded-2xl border border-white/5 bg-[#09090b]/80 flex items-center justify-between hover:border-amber-500/10 transition-all duration-300 group"
-              >
-                <div className="min-w-0 flex-1 mr-4 space-y-1.5">
-                  <div className="flex items-center gap-3">
-                    {author.avatar_url ? (
-                      <div className="h-10 w-10 rounded-full overflow-hidden relative shrink-0">
-                        <img src={author.avatar_url} alt="" className="object-cover h-10 w-10" />
-                      </div>
-                    ) : (
-                      <div className="h-10 w-10 rounded-full bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-sm font-bold text-amber-500 shrink-0">
-                        {author.full_name?.charAt(0) || "A"}
-                      </div>
-                    )}
-                    <div className="min-w-0">
-                      <h3 className="font-bold text-white text-base truncate font-serif leading-snug group-hover:text-amber-400 transition-colors">
-                        {author.full_name}
-                      </h3>
-                      <p className="text-xs text-zinc-500 font-medium">Author Account</p>
-                    </div>
-                  </div>
-
-                  <div className="space-y-1 pl-13">
-                    <p className="text-xs text-zinc-400 flex items-center gap-1.5">
-                      <Mail className="h-3.5 w-3.5 text-zinc-500" /> {author.email}
-                    </p>
-                    {author.phone && (
-                      <p className="text-xs text-zinc-400 flex items-center gap-1.5">
-                        <Phone className="h-3.5 w-3.5 text-zinc-500" /> {author.phone}
-                      </p>
-                    )}
-                  </div>
-                </div>
-
-                <div className="flex items-center gap-2 shrink-0">
-                  <Link
-                    href={`/admin/authors/${author.id}`}
-                    className="p-2 rounded-xl border border-white/5 bg-white/2 text-zinc-400 hover:text-white hover:border-amber-500/20 transition-all"
-                    title="Edit Author"
-                  >
-                    <Edit2 className="h-4 w-4" />
-                  </Link>
-                  <button
-                    onClick={() => setDeletingAuthor(author)}
-                    className="p-2 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/20 transition"
-                    title="Delete Author"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </button>
-                </div>
-              </div>
-            ))}
-          </div>
-        )}
+        <span className="text-[10px] uppercase font-bold tracking-wider text-zinc-500">
+          {filtered.length} of {authors.length} authors
+        </span>
       </div>
 
+      {loading ? (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="rounded-2xl border border-white/5 bg-zinc-900/40 p-6 space-y-4">
+              <div className="flex items-center gap-4">
+                <Skeleton className="h-14 w-14 rounded-full shimmer" />
+                <div className="space-y-2 flex-1">
+                  <Skeleton className="h-4 w-2/3 rounded shimmer" />
+                  <Skeleton className="h-3.5 w-1/2 rounded shimmer" />
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+      ) : filtered.length === 0 ? (
+        <div className="col-span-full">
+          <EmptyState
+            icon={Users}
+            title={search ? "No authors found" : "No authors registered"}
+            description={
+              search
+                ? `We couldn't find any authors matching "${search}".`
+                : "No author profiles have been created yet. Get started by registering your first author."
+            }
+            color="amber"
+            action={
+              !search ? (
+                <button
+                  onClick={() => setModal(true)}
+                  className="rounded-xl bg-white px-4 py-2.5 text-xs font-bold text-black hover:bg-zinc-200 transition shadow-lg"
+                >
+                  Add Author
+                </button>
+              ) : (
+                <button
+                  onClick={() => setSearch("")}
+                  className="rounded-xl border border-white/10 bg-white/5 px-4 py-2.5 text-xs font-bold text-zinc-300 hover:bg-white/10 transition"
+                >
+                  Clear Search
+                </button>
+              )
+            }
+          />
+        </div>
+      ) : (
+        <div className="grid gap-6 sm:grid-cols-2 xl:grid-cols-3">
+          {filtered.map((author) => (
+            <GlassCard key={author.id} className="p-6! border-white/5 bg-[#09090b]/80 relative group" hover={true}>
+              {/* Deletion button top-right */}
+              <button
+                onClick={() => setDeletingUserItem(author)}
+                className="absolute top-4 right-4 p-2 rounded-xl border border-red-500/20 bg-red-500/5 text-red-400 hover:bg-red-500/20 hover:text-red-300 transition z-10 opacity-0 group-hover:opacity-100 focus:opacity-100"
+                title="Delete Author"
+              >
+                <Trash2 className="h-3.5 w-3.5" />
+              </button>
+
+              <div className="flex items-start gap-4">
+                {/* Initials Avatar */}
+                <div className="h-14 w-14 rounded-2xl bg-amber-500/10 border border-amber-500/20 flex items-center justify-center text-lg font-bold text-amber-500 shrink-0 font-serif">
+                  {getInitials(author.full_name)}
+                </div>
+
+                <div className="min-w-0 flex-1 space-y-1">
+                  <h3 className="text-sm font-bold text-white truncate font-serif leading-none pt-1">
+                    {author.full_name}
+                  </h3>
+                  <div className="flex items-center gap-1.5 text-zinc-500">
+                    <Mail className="h-3 w-3 shrink-0" />
+                    <p className="text-[10px] truncate font-medium font-mono">{author.email}</p>
+                  </div>
+                  {author.phone && (
+                    <div className="flex items-center gap-1.5 text-zinc-500">
+                      <Phone className="h-3 w-3 shrink-0" />
+                      <p className="text-[10px] truncate font-medium font-mono">{author.phone}</p>
+                    </div>
+                  )}
+                </div>
+              </div>
+            </GlassCard>
+          ))}
+        </div>
+      )}
+
+      {/* Register Author Modal */}
       <CreateUserModal open={modal} onClose={() => setModal(false)} onCreated={load} />
 
-      {/* ── DELETE CONFIRMATION MODAL ─────────────────────────────────────── */}
+      {/* Delete Confirmation Modal */}
       <AnimatePresence>
-        {deletingAuthor && (
+        {deletingUserItem && (
           <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/80 backdrop-blur-sm p-4">
             <motion.div
               initial={{ scale: 0.95, opacity: 0 }}
               animate={{ scale: 1, opacity: 1 }}
               exit={{ scale: 0.95, opacity: 0 }}
-              className="w-full max-w-sm rounded-3xl border border-red-500/20 bg-[#09090b] p-6 shadow-2xl relative"
+              className="w-full max-w-sm rounded-3xl border border-red-500/20 bg-zinc-950 p-6 shadow-2xl relative"
             >
-              <h3 className="text-base font-bold text-red-400 mb-2">Delete Author User</h3>
-              <p className="text-xs text-zinc-400 leading-relaxed mb-6">
-                Are you sure you want to delete <span className="text-white font-semibold">"{deletingAuthor.full_name}"</span>?
-                This will delete the user account, profile, all assigned books, transactions, and messages. This is irreversible.
+              <div className="absolute top-0 inset-x-0 h-[1px] bg-gradient-to-r from-transparent via-red-500/20 to-transparent" />
+              <div className="flex items-center gap-2 text-red-400 mb-2">
+                <Trash2 className="h-4 w-4" />
+                <h3 className="text-base font-bold">Delete Author</h3>
+              </div>
+              <p className="text-xs text-zinc-400 leading-relaxed mb-4">
+                Are you sure you want to permanently delete the author <span className="text-white font-semibold">"{deletingUserItem.full_name}"</span>?
+                This clears their user profile, all associated books, royalties transactions, and messages.
               </p>
+              <div className="rounded-xl border border-red-500/20 bg-red-950/20 px-3 py-2.5 mb-6">
+                <p className="text-[10px] text-red-300 font-medium leading-normal">
+                  <strong>Warning:</strong> This action is completely irreversible.
+                </p>
+              </div>
               <div className="flex gap-3 justify-end">
                 <button
-                  onClick={() => setDeletingAuthor(null)}
+                  onClick={() => setDeletingUserItem(null)}
                   className="px-4 py-2 rounded-xl border border-white/10 bg-white/5 text-xs font-semibold text-zinc-400 hover:text-white"
                 >
                   Cancel
                 </button>
                 <button
-                  onClick={handleDeleteUser}
                   disabled={isDeleting}
-                  className="px-4 py-2 rounded-xl bg-red-600 hover:bg-red-500 text-xs font-bold text-white disabled:opacity-50 flex items-center gap-1.5"
+                  onClick={handleDeleteUser}
+                  className="px-4 py-2 rounded-xl bg-red-650 hover:bg-red-500 text-xs font-bold text-white transition flex items-center gap-1.5"
                 >
-                  {isDeleting && <Loader2 className="h-3 w-3 animate-spin" />}
+                  {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
                   Delete Account
                 </button>
               </div>

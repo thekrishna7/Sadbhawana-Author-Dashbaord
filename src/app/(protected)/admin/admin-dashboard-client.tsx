@@ -45,7 +45,23 @@ export function AdminDashboardClient({
   const [docTitle, setDocTitle] = useState("");
   const [docCategory, setDocCategory] = useState("agreement");
   const [selectedAuthorId, setSelectedAuthorId] = useState("");
+  const [selectedBookId, setSelectedBookId] = useState("");
+  const [booksList, setBooksList] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
+
+  useEffect(() => {
+    if (selectedAuthorId) {
+      supabase
+        .from("books")
+        .select("id, title")
+        .eq("author_id", selectedAuthorId)
+        .order("title")
+        .then(({ data }) => setBooksList(data ?? []));
+    } else {
+      setBooksList([]);
+      setSelectedBookId("");
+    }
+  }, [selectedAuthorId, supabase]);
 
   // Dynamic author list for dropdown
   const [authorsList, setAuthorsList] = useState<Pick<Profile, "id" | "full_name" | "email">[]>([]);
@@ -89,13 +105,12 @@ export function AdminDashboardClient({
     try {
       const { data, error } = await supabase
         .from("documents")
-        .select("*, uploader:profiles!uploaded_by(full_name), author:profiles!author_id(full_name), book:books(title)")
+        .select("*, uploader:profiles!uploaded_by(full_name, role), author:profiles!author_id(full_name), book:books(title)")
         .neq("uploaded_by", profile.id)
-        .eq("deleted_by_admin", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
-      setSharedDocs(data ?? []);
+      setSharedDocs((data ?? []).filter(d => (d.uploader as any)?.role === 'author'));
     } catch (err: any) {
       console.error("Failed to load author uploads:", err);
       toast.error("Failed to load uploaded files.");
@@ -112,7 +127,6 @@ export function AdminDashboardClient({
         .from("documents")
         .select("*, uploader:profiles!uploaded_by(full_name), author:profiles!author_id(full_name), book:books(title)")
         .eq("uploaded_by", profile.id)
-        .eq("deleted_by_admin", false)
         .order("created_at", { ascending: false });
 
       if (error) throw error;
@@ -146,17 +160,17 @@ export function AdminDashboardClient({
     }
   });
 
-  // Soft Delete Handler
+  // File Deletion Handler (Deletes the record from the database completely)
   const handleConfirmDelete = async () => {
     if (!deletingFile) return;
     try {
       const { error } = await supabase
         .from("documents")
-        .update({ deleted_by_admin: true })
+        .delete()
         .eq("id", deletingFile.id);
 
       if (error) throw error;
-      toast.success("File removed from history.");
+      toast.success("File deleted from history.");
       setConfirmDeleteShow(false);
       setDeletingFile(null);
       
@@ -164,8 +178,8 @@ export function AdminDashboardClient({
       loadUploadedDocs();
       loadSharedDocs();
     } catch (err: any) {
-      console.error("Delete history error:", err);
-      toast.error("Failed to remove file from history.");
+      console.error("Delete file error:", err);
+      toast.error("Failed to delete file from history.");
     }
   };
 
@@ -199,6 +213,7 @@ export function AdminDashboardClient({
       // Insert document record in DB
       const { error: insertErr } = await supabase.from("documents").insert({
         author_id: selectedAuthorId,
+        book_id: selectedBookId || null,
         title: docTitle.trim() || selectedFile.name,
         file_url: fileRef,
         file_name: selectedFile.name,
@@ -214,7 +229,7 @@ export function AdminDashboardClient({
         user_id: profile.id,
         action: "document_uploaded",
         entity_type: "document",
-        metadata: { title: docTitle.trim() || selectedFile.name, category: docCategory, assigned_author: selectedAuthorId },
+        metadata: { title: docTitle.trim() || selectedFile.name, category: docCategory, assigned_author: selectedAuthorId, book_id: selectedBookId || null },
       });
 
       toast.success("File uploaded and synced to author dashboard!");
@@ -222,6 +237,7 @@ export function AdminDashboardClient({
       setSelectedFile(null);
       setDocTitle("");
       setSelectedAuthorId("");
+      setSelectedBookId("");
       setDocCategory("agreement");
     } catch (err: any) {
       console.error("Upload process error:", err);
@@ -372,6 +388,7 @@ export function AdminDashboardClient({
                     setSelectedFile(null);
                     setDocTitle("");
                     setSelectedAuthorId("");
+                    setSelectedBookId("");
                     setDocCategory("agreement");
                     setActiveUploadTab("upload");
                   }}
@@ -470,6 +487,24 @@ export function AdminDashboardClient({
                       {authorsList.map((a) => (
                         <option key={a.id} value={a.id}>
                           {a.full_name} ({a.email})
+                        </option>
+                      ))}
+                    </select>
+                  </div>
+
+                  {/* Book Linkage Dropdown */}
+                  <div className="space-y-1.5">
+                    <label className="text-[10px] font-bold uppercase tracking-wider text-zinc-400">Associate with Book (Optional)</label>
+                    <select
+                      className="w-full rounded-2xl border border-white/10 bg-zinc-900 px-4 py-3 text-xs text-white focus:outline-none focus:border-amber-500/30 transition-all font-semibold"
+                      value={selectedBookId}
+                      onChange={(e) => setSelectedBookId(e.target.value)}
+                      disabled={!selectedAuthorId}
+                    >
+                      <option value="">{selectedAuthorId ? "General Publication File" : "Select Author first..."}</option>
+                      {booksList.map((b) => (
+                        <option key={b.id} value={b.id}>
+                          {b.title}
                         </option>
                       ))}
                     </select>

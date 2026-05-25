@@ -10,7 +10,7 @@ export default async function AdminOverviewPage() {
 
   const [
     { count: authors },
-    { count: books },
+    { count: books }
   ] = await Promise.all([
     supabase.from("profiles").select("*", { count: "exact", head: true }).eq("role", "author"),
     supabase.from("books").select("*", { count: "exact", head: true }),
