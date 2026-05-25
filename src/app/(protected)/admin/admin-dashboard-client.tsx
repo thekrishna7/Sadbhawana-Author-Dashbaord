@@ -49,6 +49,9 @@ export function AdminDashboardClient({
   const [booksList, setBooksList] = useState<any[]>([]);
   const [uploading, setUploading] = useState(false);
 
+  const supabase = useMemo(() => createClient(), []);
+  const toast = useToast();
+
   useEffect(() => {
     if (selectedAuthorId) {
       supabase
@@ -81,9 +84,6 @@ export function AdminDashboardClient({
   // Document preview state
   const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; isImage: boolean; isPdf: boolean } | null>(null);
   const [resolvingPreviewId, setResolvingPreviewId] = useState<string | null>(null);
-
-  const supabase = useMemo(() => createClient(), []);
-  const toast = useToast();
 
   // Load Authors for dropdown
   const loadAuthors = useCallback(async () => {
