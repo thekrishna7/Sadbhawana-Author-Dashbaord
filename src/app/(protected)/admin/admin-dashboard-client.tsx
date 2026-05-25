@@ -173,7 +173,7 @@ export function AdminDashboardClient({
       toast.success("File deleted from history.");
       setConfirmDeleteShow(false);
       setDeletingFile(null);
-      
+
       // Reload details
       loadUploadedDocs();
       loadSharedDocs();
@@ -205,7 +205,7 @@ export function AdminDashboardClient({
     try {
       const cleanFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `admin-uploads/${selectedAuthorId}/${Date.now()}-${cleanFileName}`;
-      
+
       // Upload to private Supabase bucket
       const { path: storedPath } = await uploadPrivate("documents", path, selectedFile);
       const fileRef = storageRef("documents", storedPath);
@@ -403,22 +403,20 @@ export function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setActiveUploadTab("upload")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeUploadTab === "upload"
-                      ? "bg-white text-black shadow-md"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeUploadTab === "upload"
+                    ? "bg-white text-black shadow-md"
+                    : "text-zinc-400 hover:text-white"
+                    }`}
                 >
                   Upload File
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveUploadTab("history")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeUploadTab === "history"
-                      ? "bg-white text-black shadow-md"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeUploadTab === "history"
+                    ? "bg-white text-black shadow-md"
+                    : "text-zinc-400 hover:text-white"
+                    }`}
                 >
                   Past Uploaded Files
                 </button>
@@ -518,10 +516,12 @@ export function AdminDashboardClient({
                       value={docCategory}
                       onChange={(e) => setDocCategory(e.target.value)}
                     >
+                      <option value="other">Manuscript Draft</option>
                       <option value="agreement">Agreement / Contract</option>
-                      <option value="isbn_certificate">ISBN Document</option>
-                      <option value="invoice">Invoice / Bill</option>
+                      <option value="other">Book Cover Concept</option>
                       <option value="royalty_statement">Royalty Statement</option>
+                      <option value="invoice">Invoice / Bill</option>
+                      <option value="isbn_certificate">ISBN Document</option>
                       <option value="contract">Contract</option>
                       <option value="other">Other Document</option>
                     </select>
@@ -550,18 +550,16 @@ export function AdminDashboardClient({
                     <button
                       type="button"
                       onClick={() => setHistorySubTab("author")}
-                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
-                        historySubTab === "author" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
-                      }`}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${historySubTab === "author" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                        }`}
                     >
                       Author Uploaded Files
                     </button>
                     <button
                       type="button"
                       onClick={() => setHistorySubTab("admin")}
-                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
-                        historySubTab === "admin" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
-                      }`}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${historySubTab === "admin" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                        }`}
                     >
                       Admin Uploaded Files
                     </button>
@@ -572,7 +570,7 @@ export function AdminDashboardClient({
                     {(() => {
                       const files = historySubTab === "author" ? sharedDocs : uploadedDocs;
                       const loadingFiles = historySubTab === "author" ? loadingShared : loadingUploaded;
-                      
+
                       if (loadingFiles) {
                         return (
                           <div className="flex flex-col items-center justify-center py-10 text-zinc-550 gap-2">
@@ -581,7 +579,7 @@ export function AdminDashboardClient({
                           </div>
                         );
                       }
-                      
+
                       if (files.length === 0) {
                         return (
                           <p className="text-xs text-zinc-500 italic text-center py-10">No past uploaded files in this history.</p>
@@ -675,22 +673,20 @@ export function AdminDashboardClient({
                 <button
                   type="button"
                   onClick={() => setActiveDownloadTab("download")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeDownloadTab === "download"
-                      ? "bg-white text-black shadow-md"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeDownloadTab === "download"
+                    ? "bg-white text-black shadow-md"
+                    : "text-zinc-400 hover:text-white"
+                    }`}
                 >
                   Available Files
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveDownloadTab("history")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeDownloadTab === "history"
-                      ? "bg-white text-black shadow-md"
-                      : "text-zinc-400 hover:text-white"
-                  }`}
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeDownloadTab === "history"
+                    ? "bg-white text-black shadow-md"
+                    : "text-zinc-400 hover:text-white"
+                    }`}
                 >
                   Past Downloaded Files
                 </button>
@@ -720,7 +716,7 @@ export function AdminDashboardClient({
                     )}
                     {sharedDocs.map((doc) => {
                       const previewable = /\.(pdf|png|jpe?g|webp|svg)$/i.test(doc.file_name);
-                      
+
                       return (
                         <div
                           key={doc.id}

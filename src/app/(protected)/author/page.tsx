@@ -160,7 +160,7 @@ export default function AuthorDashboardPage() {
       toast.success("File deleted from history.");
       setConfirmDeleteShow(false);
       setDeletingFile(null);
-      
+
       // Reload details
       loadUploadedDocs();
       loadSharedDocs();
@@ -190,7 +190,7 @@ export default function AuthorDashboardPage() {
     try {
       const cleanFileName = selectedFile.name.replace(/[^a-zA-Z0-9._-]/g, "_");
       const path = `author-uploads/${profile.id}/${Date.now()}-${cleanFileName}`;
-      
+
       // Upload to private Supabase bucket
       const { path: storedPath } = await uploadPrivate("documents", path, selectedFile);
       const fileRef = storageRef("documents", storedPath);
@@ -407,22 +407,20 @@ export default function AuthorDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveUploadTab("upload")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeUploadTab === "upload"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeUploadTab === "upload"
                       ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Upload File
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveUploadTab("history")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeUploadTab === "history"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeUploadTab === "history"
                       ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Past Uploaded Files
                 </button>
@@ -537,18 +535,16 @@ export default function AuthorDashboardPage() {
                     <button
                       type="button"
                       onClick={() => setHistorySubTab("author")}
-                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
-                        historySubTab === "author" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
-                      }`}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${historySubTab === "author" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                        }`}
                     >
                       Author Uploaded Files
                     </button>
                     <button
                       type="button"
                       onClick={() => setHistorySubTab("admin")}
-                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${
-                        historySubTab === "admin" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
-                      }`}
+                      className={`flex-1 py-1.5 rounded-lg text-[9px] font-bold uppercase tracking-wider transition ${historySubTab === "admin" ? "bg-zinc-800 text-amber-500" : "text-zinc-450 hover:text-white"
+                        }`}
                     >
                       Admin Uploaded Files
                     </button>
@@ -559,7 +555,7 @@ export default function AuthorDashboardPage() {
                     {(() => {
                       const files = historySubTab === "author" ? uploadedDocs : sharedDocs;
                       const loadingFiles = historySubTab === "author" ? loadingUploaded : loadingShared;
-                      
+
                       if (loadingFiles) {
                         return (
                           <div className="flex flex-col items-center justify-center py-10 text-zinc-550 gap-2">
@@ -568,7 +564,7 @@ export default function AuthorDashboardPage() {
                           </div>
                         );
                       }
-                      
+
                       if (files.length === 0) {
                         return (
                           <p className="text-xs text-zinc-500 italic text-center py-10">No past uploaded files in this history.</p>
@@ -657,22 +653,20 @@ export default function AuthorDashboardPage() {
                 <button
                   type="button"
                   onClick={() => setActiveDownloadTab("download")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeDownloadTab === "download"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeDownloadTab === "download"
                       ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Available Files
                 </button>
                 <button
                   type="button"
                   onClick={() => setActiveDownloadTab("history")}
-                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${
-                    activeDownloadTab === "history"
+                  className={`px-4 py-2 rounded-xl text-xs font-bold transition ${activeDownloadTab === "history"
                       ? "bg-white text-black shadow-md"
                       : "text-zinc-400 hover:text-white"
-                  }`}
+                    }`}
                 >
                   Past Downloaded Files
                 </button>
@@ -702,7 +696,7 @@ export default function AuthorDashboardPage() {
                     )}
                     {sharedDocs.map((doc) => {
                       const previewable = /\.(pdf|png|jpe?g|webp|svg)$/i.test(doc.file_name);
-                      
+
                       return (
                         <div
                           key={doc.id}

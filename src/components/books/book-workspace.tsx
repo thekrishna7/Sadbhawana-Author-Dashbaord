@@ -90,7 +90,7 @@ export function BookWorkspace({
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data.error || "Failed to delete book");
-      
+
       toast.success(`Book "${book.title}" deleted successfully.`);
       window.location.href = basePath;
     } catch (err) {
@@ -328,7 +328,7 @@ export function BookWorkspace({
                   Are you sure you want to permanently delete the book{" "}
                   <span className="text-white font-semibold">"{book.title}"</span>?
                 </p>
-                
+
                 <div className="rounded-xl border border-red-500/20 bg-red-950/20 px-4 py-3">
                   <p className="text-xs text-red-300 leading-relaxed">
                     <strong>Warning:</strong> This action is permanent and will delete the book's manuscript, cover design files, conversations, activity logs, and transaction records.
@@ -830,11 +830,13 @@ function DocumentsTab({
                     value={docCategory}
                     onChange={(e) => setDocCategory(e.target.value)}
                   >
-                    <option value="agreement">Agreement</option>
-                    <option value="invoice">Invoice</option>
-                    <option value="isbn_certificate">ISBN Certificate</option>
-                    <option value="contract">Contract</option>
+                    <option value="other">Manuscript Draft</option>
+                    <option value="agreement">Agreement / Contract</option>
+                    <option value="other">Book Cover Concept</option>
                     <option value="royalty_statement">Royalty Statement</option>
+                    <option value="invoice">Invoice / Bill</option>
+                    <option value="isbn_certificate">ISBN Document</option>
+                    <option value="contract">Contract</option>
                     <option value="other">Other Document</option>
                   </select>
                 </div>
@@ -991,11 +993,11 @@ function BookSettings({
   async function save() {
     setSaving(true);
     const supabase = createClient();
-    
+
     // Detect changes to notify author
     const changes: string[] = [];
     const criticalChanges: string[] = [];
-    
+
     if (form.current_stage !== book.current_stage) {
       changes.push(`Publishing stage updated to: ${form.current_stage.replace(/_/g, " ")}`);
     }
@@ -1035,7 +1037,7 @@ function BookSettings({
           link: `/author/books/${book.id}`,
         });
       }
-      
+
       // Send notifications for critical updates (royalties, launch date)
       if (criticalChanges.length > 0) {
         await sendNotification({
@@ -1049,7 +1051,7 @@ function BookSettings({
     } else {
       console.error("Failed to update book settings:", error);
     }
-    
+
     setSaving(false);
     onSave();
   }
