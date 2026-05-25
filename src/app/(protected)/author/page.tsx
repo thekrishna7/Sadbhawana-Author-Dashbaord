@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { AuthorShell } from "@/components/layout/author-shell";
 import { GlassCard } from "@/components/ui/glass-card";
 import { createClient } from "@/lib/supabase/client";
@@ -49,7 +49,7 @@ export default function AuthorDashboardPage() {
   const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; isImage: boolean; isPdf: boolean } | null>(null);
   const [resolvingPreviewId, setResolvingPreviewId] = useState<string | null>(null);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
 
   const loadDashboard = useCallback(async () => {
@@ -112,7 +112,7 @@ export default function AuthorDashboardPage() {
     } finally {
       setLoadingShared(false);
     }
-  }, [profile, supabase, toast]);
+  }, [profile, supabase]);
 
   // Load documents uploaded by this author
   const loadUploadedDocs = useCallback(async () => {

@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useMemo } from "react";
 import { DashboardShell } from "@/components/layout/dashboard-shell";
 import { GlassCard } from "@/components/ui/glass-card";
 import { createClient } from "@/lib/supabase/client";
@@ -82,7 +82,7 @@ export function AdminDashboardClient({
   const [previewDoc, setPreviewDoc] = useState<{ title: string; url: string; isImage: boolean; isPdf: boolean } | null>(null);
   const [resolvingPreviewId, setResolvingPreviewId] = useState<string | null>(null);
 
-  const supabase = createClient();
+  const supabase = useMemo(() => createClient(), []);
   const toast = useToast();
 
   // Load Authors for dropdown
@@ -117,7 +117,7 @@ export function AdminDashboardClient({
     } finally {
       setLoadingShared(false);
     }
-  }, [profile.id, supabase, toast]);
+  }, [profile.id, supabase]);
 
   // Load documents uploaded by admin
   const loadUploadedDocs = useCallback(async () => {
