@@ -199,7 +199,7 @@ export default function AuthorBooksPage() {
                       >
                         <p className="text-[9px] font-bold text-zinc-550 uppercase tracking-wider mb-1 border-b border-white/5 pb-1 text-left">Month-wise Website Sales</p>
                         {(() => {
-                          const websiteSalesMonthly = (sales as any)?.website_sales_monthly ?? {};
+                          const websiteSalesMonthly = ((sales as any)?.website_sales_monthly ?? {}) as Record<string, any>;
                           return Object.keys(websiteSalesMonthly).length === 0 ? (
                             <p className="text-[10px] text-zinc-600 italic text-left">No monthly breakdown available.</p>
                           ) : (
@@ -243,7 +243,7 @@ export default function AuthorBooksPage() {
                       >
                         <p className="text-[9px] font-bold text-zinc-555 uppercase tracking-wider mb-1 border-b border-white/5 pb-1 text-left">Month-wise Amazon Sales</p>
                         {(() => {
-                          const amazonSalesMonthly = (sales as any)?.amazon_sales_monthly ?? {};
+                          const amazonSalesMonthly = ((sales as any)?.amazon_sales_monthly ?? {}) as Record<string, any>;
                           return Object.keys(amazonSalesMonthly).length === 0 ? (
                             <p className="text-[10px] text-zinc-600 italic text-left">No monthly breakdown available.</p>
                           ) : (
