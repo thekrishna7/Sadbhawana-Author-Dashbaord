@@ -1,0 +1,149 @@
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+model User {
+  id            String          @id @default(uuid())
+  username      String          @unique
+  email         String          @unique
+  passwordHash  String
+  fullName      String
+  phone         String?
+  avatarUrl     String?
+  role          String          @default("AUTHOR")
+  status        String          @default("ACTIVE")
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  assignments   BookAssignment[]
+  uploadedFiles File[]          @relation("UploaderRelation")
+  fileVersions  FileVersion[]   @relation("VersionUploader")
+  changeRequests ChangeRequest[]
+  notifications Notification[]
+  activityLogs  ActivityLog[]
+}
+
+model Book {
+  id              String           @id @default(uuid())
+  name            String
+  isbn            String?          @unique
+  publicationDate String?
+  language        String           @default("English")
+  edition         String           @default("1st Edition")
+  bookType        String           @default("PAPERBACK")
+  status          String           @default("IN_PROGRESS")
+  description     String?
+  coverImageUrl   String?
+  createdAt       DateTime         @default(now())
+  updatedAt       DateTime         @updatedAt
+
+  assignments     BookAssignment[]
+  files           File[]
+}
+
+model BookAssignment {
+  id         String   @id @default(uuid())
+  bookId     String
+  authorId   String
+  assignedAt DateTime @default(now())
+
+  book       Book     @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  author     User     @relation(fields: [authorId], references: [id], onDelete: Cascade)
+
+  @@unique([bookId, authorId])
+}
+
+model File {
+  id            String          @id @default(uuid())
+  bookId        String
+  uploaderId    String
+  fileName      String
+  filePath      String
+  fileType      String          @default("OTHER")
+  version       Int             @default(1)
+  fileSize      Int             @default(0)
+  description   String?
+  status        String          @default("SUBMITTED")
+  downloadCount Int             @default(0)
+  createdAt     DateTime        @default(now())
+  updatedAt     DateTime        @updatedAt
+
+  book          Book            @relation(fields: [bookId], references: [id], onDelete: Cascade)
+  uploader      User            @relation("UploaderRelation", fields: [uploaderId], references: [id], onDelete: Cascade)
+  versions      FileVersion[]
+  changeRequests ChangeRequest[]
+}
+
+model FileVersion {
+  id         String   @id @default(uuid())
+  fileId     String
+  version    Int
+  fileName   String
+  filePath   String
+  fileSize   Int      @default(0)
+  uploadedBy String
+  notes      String?
+  createdAt  DateTime @default(now())
+
+  file       File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  uploader   User     @relation("VersionUploader", fields: [uploadedBy], references: [id], onDelete: Cascade)
+}
+
+model ChangeRequest {
+  id        String   @id @default(uuid())
+  fileId    String
+  userId    String
+  details   String
+  status    String   @default("PENDING")
+  createdAt DateTime @default(now())
+
+  file      File     @relation(fields: [fileId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model Notification {
+  id        String   @id @default(uuid())
+  userId    String
+  title     String
+  message   String
+  type      String   @default("SYSTEM")
+  read      Boolean  @default(false)
+  linkUrl   String?
+  createdAt DateTime @default(now())
+
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+}
+
+model ActivityLog {
+  id         String   @id @default(uuid())
+  userId     String?
+  userName   String
+  action     String
+  entityType String
+  entityName String?
+  details    String?
+  createdAt  DateTime @default(now())
+
+  user       User?    @relation(fields: [userId], references: [id], onDelete: SetNull)
+}
+
+model EmailLog {
+  id             String   @id @default(uuid())
+  recipientEmail String
+  subject        String
+  bodyHtml       String
+  status         String   @default("SENT")
+  sentAt         DateTime @default(now())
+}
+
+model Setting {
+  id        String   @id @default(uuid())
+  key       String   @unique
+  value     String
+  updatedAt DateTime @updatedAt
+}
