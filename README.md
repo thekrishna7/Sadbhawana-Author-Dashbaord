@@ -119,8 +119,8 @@ Administrators access the system via the secure `/login` portal using credential
 
 ### 1. Clone & Install Dependencies
 ```bash
-git clone https://github.com/thekrishna7/sadbhawanaauthordashbaord.git
-cd sadbhawanaauthordashbaord
+git clone https://github.com/thekrishna7/Sadbhawana-Author-Dashbaord.git
+cd Sadbhawana-Author-Dashbaord
 npm install
 ```
 
