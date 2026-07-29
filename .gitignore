@@ -11,6 +11,7 @@
 # environment variables & secrets (CRITICAL: NEVER COMMIT TO GIT)
 .env
 .env.local
+.env.sample
 .env.development.local
 .env.test.local
 .env.production.local
