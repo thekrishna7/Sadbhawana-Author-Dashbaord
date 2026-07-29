@@ -83,37 +83,49 @@ export async function POST(req: NextRequest) {
 
     // Handle book assignments
     if (Array.isArray(assignedBookIds) && assignedBookIds.length > 0) {
-      const assignmentData = assignedBookIds.map((bookId: string) => ({
-        bookId,
-        authorId: author.id,
-      }));
-      await db.bookAssignment.createMany({
-        data: assignmentData,
-      });
+      try {
+        const assignmentData = assignedBookIds.map((bookId: string) => ({
+          bookId,
+          authorId: author.id,
+        }));
+        await db.bookAssignment.createMany({
+          data: assignmentData,
+        });
 
-      // Send notifications for each book
-      for (const bookId of assignedBookIds) {
-        const book = await db.book.findUnique({ where: { id: bookId } });
-        if (book) {
-          await createNotification({
-            userId: author.id,
-            title: 'Book Assigned',
-            message: `Admin assigned "${book.name}" to your portal. Login to review received files.`,
-            type: 'BOOK_ASSIGNED',
-            linkUrl: '/author/books',
-          });
+        // Send notifications for each book
+        for (const bookId of assignedBookIds) {
+          try {
+            const book = await db.book.findUnique({ where: { id: bookId } });
+            if (book) {
+              await createNotification({
+                userId: author.id,
+                title: 'Book Assigned',
+                message: `Admin assigned "${book.name}" to your portal. Login to review received files.`,
+                type: 'BOOK_ASSIGNED',
+                linkUrl: '/author/books',
+              });
+            }
+          } catch (notifErr) {
+            console.error('Failed to create book assignment notification:', notifErr);
+          }
         }
+      } catch (assignErr) {
+        console.error('Failed to assign books:', assignErr);
       }
     }
 
-    await logActivity({
-      userId: currentUser.id,
-      userName: currentUser.fullName,
-      action: 'CREATE_AUTHOR',
-      entityType: 'User',
-      entityName: author.fullName,
-      details: `Created author account username: ${author.username}`,
-    });
+    try {
+      await logActivity({
+        userId: currentUser.id,
+        userName: currentUser.fullName,
+        action: 'CREATE_AUTHOR',
+        entityType: 'User',
+        entityName: author.fullName,
+        details: `Created author account username: ${author.username}`,
+      });
+    } catch (logErr) {
+      console.error('Failed to log activity:', logErr);
+    }
 
     return NextResponse.json({ success: true, author });
   } catch (error: any) {

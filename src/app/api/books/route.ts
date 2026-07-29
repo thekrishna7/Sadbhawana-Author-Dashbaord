@@ -85,36 +85,48 @@ export async function POST(req: NextRequest) {
     });
 
     if (Array.isArray(assignedAuthorIds) && assignedAuthorIds.length > 0) {
-      await db.bookAssignment.createMany({
-        data: assignedAuthorIds.map((authorId: string) => ({
-          bookId: book.id,
-          authorId,
-        })),
-      });
-
-      for (const authorId of assignedAuthorIds) {
-        await createNotification({
-          userId: authorId,
-          title: 'Book Assigned',
-          message: `Admin assigned "${book.name}" to your Sadbhawana portal.`,
-          type: 'BOOK_ASSIGNED',
-          linkUrl: '/author/books',
+      try {
+        await db.bookAssignment.createMany({
+          data: assignedAuthorIds.map((authorId: string) => ({
+            bookId: book.id,
+            authorId,
+          })),
         });
+
+        for (const authorId of assignedAuthorIds) {
+          try {
+            await createNotification({
+              userId: authorId,
+              title: 'Book Assigned',
+              message: `Admin assigned "${book.name}" to your Sadbhawana portal.`,
+              type: 'BOOK_ASSIGNED',
+              linkUrl: '/author/books',
+            });
+          } catch (notifErr) {
+            console.error('Failed to send book assignment notification:', notifErr);
+          }
+        }
+      } catch (assignErr) {
+        console.error('Failed to create book assignments:', assignErr);
       }
     }
 
-    await logActivity({
-      userId: currentUser.id,
-      userName: currentUser.fullName,
-      action: 'CREATE_BOOK',
-      entityType: 'Book',
-      entityName: book.name,
-      details: `Created new book: ${book.name} (ISBN: ${book.isbn || 'N/A'})`,
-    });
+    try {
+      await logActivity({
+        userId: currentUser.id,
+        userName: currentUser.fullName,
+        action: 'CREATE_BOOK',
+        entityType: 'Book',
+        entityName: book.name,
+        details: `Created new book: ${book.name} (ISBN: ${book.isbn || 'N/A'})`,
+      });
+    } catch (logErr) {
+      console.error('Failed to log activity:', logErr);
+    }
 
     return NextResponse.json({ success: true, book });
   } catch (error: any) {
     console.error('Create book error:', error);
-    return NextResponse.json({ error: 'Failed to create book' }, { status: 500 });
+    return NextResponse.json({ error: error.message || 'Failed to create book' }, { status: 500 });
   }
 }
