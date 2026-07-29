@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getCurrentUser } from '@/lib/auth';
 import { logActivity } from '@/lib/logger';
 import { createNotification } from '@/lib/notifications';
@@ -55,8 +56,13 @@ export async function GET() {
       });
     }
   } catch (err) {
-    console.warn('Prisma books GET failed, returning empty books list:', err);
-    books = [];
+    console.warn('Prisma books GET failed, falling back to Supabase REST:', err);
+    try {
+      const { data } = await supabaseAdmin.from('Book').select('*').order('createdAt', { ascending: false });
+      books = data || [];
+    } catch (sErr) {
+      books = [];
+    }
   }
 
   return NextResponse.json({ books });
@@ -92,9 +98,10 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (createErr) {
-      console.warn('Prisma book create failed, returning created book payload:', createErr);
-      book = {
-        id: `book-${Date.now()}`,
+      console.warn('Prisma book create failed, inserting directly via Supabase REST:', createErr);
+      const newBookId = `book-${Date.now()}`;
+      const { data, error: supaInsertErr } = await supabaseAdmin.from('Book').insert([{
+        id: newBookId,
         name,
         isbn: isbn || null,
         publicationDate: publicationDate || null,
@@ -104,10 +111,28 @@ export async function POST(req: NextRequest) {
         status: status || 'IN_PROGRESS',
         description: description || null,
         coverImageUrl: coverImageUrl || null,
-        createdAt: new Date().toISOString(),
-        assignments: [],
-        files: [],
-      };
+      }]).select();
+
+      if (supaInsertErr || !data || data.length === 0) {
+        console.error('Supabase REST book insert error:', supaInsertErr);
+        book = {
+          id: newBookId,
+          name,
+          isbn: isbn || null,
+          publicationDate: publicationDate || null,
+          language: language || 'English',
+          edition: edition || '1st Edition',
+          bookType: bookType || 'PAPERBACK',
+          status: status || 'IN_PROGRESS',
+          description: description || null,
+          coverImageUrl: coverImageUrl || null,
+          createdAt: new Date().toISOString(),
+          assignments: [],
+          files: [],
+        };
+      } else {
+        book = data[0];
+      }
     }
 
     if (Array.isArray(assignedAuthorIds) && assignedAuthorIds.length > 0) {

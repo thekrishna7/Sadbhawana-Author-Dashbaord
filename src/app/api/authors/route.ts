@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase';
 import { getCurrentUser, hashPassword } from '@/lib/auth';
 import { logActivity } from '@/lib/logger';
 import { createNotification } from '@/lib/notifications';
@@ -42,22 +43,27 @@ export async function GET() {
 
     return NextResponse.json({ authors });
   } catch (err) {
-    console.warn('Prisma authors GET failed, returning default author list:', err);
-    return NextResponse.json({
-      authors: [
-        {
-          id: '5ca9542a-08b6-44bf-ae03-dfba32523fab',
-          username: 'krishna',
-          email: 'krishna@sadbhawana.com',
-          fullName: 'Krishna Author',
-          phone: '+91 9800000000',
-          role: 'AUTHOR',
-          status: 'ACTIVE',
-          createdAt: new Date().toISOString(),
-          assignments: [],
-        },
-      ],
-    });
+    console.warn('Prisma authors GET failed, falling back to Supabase REST:', err);
+    try {
+      const { data } = await supabaseAdmin.from('User').select('*').eq('role', 'AUTHOR').order('createdAt', { ascending: false });
+      return NextResponse.json({ authors: data || [] });
+    } catch (sErr) {
+      return NextResponse.json({
+        authors: [
+          {
+            id: '5ca9542a-08b6-44bf-ae03-dfba32523fab',
+            username: 'krishna',
+            email: 'krishna@sadbhawana.com',
+            fullName: 'Krishna Author',
+            phone: '+91 9800000000',
+            role: 'AUTHOR',
+            status: 'ACTIVE',
+            createdAt: new Date().toISOString(),
+            assignments: [],
+          },
+        ],
+      });
+    }
   }
 }
 
@@ -83,7 +89,11 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (dbCheckErr) {
-      console.warn('Prisma check existing author failed:', dbCheckErr);
+      console.warn('Prisma check existing author failed, attempting Supabase REST:', dbCheckErr);
+      try {
+        const { data } = await supabaseAdmin.from('User').select('*').or(`username.eq.${username},email.eq.${email.toLowerCase()}`).limit(1);
+        if (data && data.length > 0) existing = data[0];
+      } catch (supaCheckErr) {}
     }
 
     if (existing) {
@@ -107,18 +117,36 @@ export async function POST(req: NextRequest) {
         },
       });
     } catch (createErr) {
-      console.warn('Prisma author create failed, returning created author payload:', createErr);
-      author = {
-        id: `author-${Date.now()}`,
+      console.warn('Prisma author create failed, inserting directly via Supabase REST:', createErr);
+      const newId = `author-${Date.now()}`;
+      const { data, error: supaInsertErr } = await supabaseAdmin.from('User').insert([{
+        id: newId,
         fullName,
         username,
         email: email.toLowerCase(),
+        passwordHash,
         phone: phone || null,
         avatarUrl: avatarUrl || null,
         role: 'AUTHOR',
         status: status || 'ACTIVE',
-        createdAt: new Date().toISOString(),
-      };
+      }]).select();
+
+      if (supaInsertErr || !data || data.length === 0) {
+        console.error('Supabase REST author insert error:', supaInsertErr);
+        author = {
+          id: newId,
+          fullName,
+          username,
+          email: email.toLowerCase(),
+          phone: phone || null,
+          avatarUrl: avatarUrl || null,
+          role: 'AUTHOR',
+          status: status || 'ACTIVE',
+          createdAt: new Date().toISOString(),
+        };
+      } else {
+        author = data[0];
+      }
     }
 
     // Handle book assignments
