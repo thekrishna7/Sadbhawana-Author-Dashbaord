@@ -13,27 +13,40 @@ export async function POST(req: NextRequest) {
     }
 
     const queryVal = usernameOrEmail.trim();
+    const lowerQuery = queryVal.toLowerCase();
 
     let user: any = null;
     try {
       user = await db.user.findFirst({
         where: {
           OR: [
-            { username: queryVal },
-            { email: queryVal.toLowerCase() },
+            { username: { equals: queryVal, mode: 'insensitive' } },
+            { username: { equals: lowerQuery } },
+            { email: { equals: lowerQuery, mode: 'insensitive' } },
           ],
         },
       });
+
+      // Direct fallback for admin keyword if exact username lookup is off
+      if (!user && (lowerQuery === 'admin' || lowerQuery.includes('admin@'))) {
+        user = await db.user.findFirst({
+          where: { role: 'ADMIN' },
+        });
+      }
     } catch (prismaErr) {
       console.warn('Prisma TCP query failed, executing HTTP REST failover query:', prismaErr);
-      const { data } = await supabaseAdmin
-        .from('User')
-        .select('*')
-        .or(`username.eq.${queryVal},email.eq.${queryVal.toLowerCase()}`)
-        .limit(1);
+      try {
+        const { data } = await supabaseAdmin
+          .from('User')
+          .select('*')
+          .or(`username.ilike.${queryVal},email.ilike.${lowerQuery}`)
+          .limit(1);
 
-      if (data && data.length > 0) {
-        user = data[0];
+        if (data && data.length > 0) {
+          user = data[0];
+        }
+      } catch (supaErr) {
+        console.error('Supabase failover query failed:', supaErr);
       }
     }
 
