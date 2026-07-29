@@ -45,18 +45,25 @@ export async function POST(req: NextRequest) {
 
     await createSession(sessionData, rememberMe ?? true);
 
-    await logActivity({
-      userId: user.id,
-      userName: user.fullName,
-      action: 'LOGIN',
-      entityType: 'User',
-      entityName: user.username,
-      details: `User logged in successfully as ${user.role}`,
-    });
+    try {
+      await logActivity({
+        userId: user.id,
+        userName: user.fullName,
+        action: 'LOGIN',
+        entityType: 'User',
+        entityName: user.username,
+        details: `User logged in successfully as ${user.role}`,
+      });
+    } catch (logErr) {
+      console.error('Activity log error:', logErr);
+    }
 
     return NextResponse.json({ success: true, user: sessionData });
   } catch (error: any) {
     console.error('Login error:', error);
-    return NextResponse.json({ error: 'Internal server error' }, { status: 500 });
+    return NextResponse.json(
+      { error: error?.message || 'Internal server error. Please check environment variables.' },
+      { status: 500 }
+    );
   }
 }
