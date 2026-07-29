@@ -1,5 +1,6 @@
 import { NextRequest, NextResponse } from 'next/server';
 import { db } from '@/lib/db';
+import { supabaseAdmin } from '@/lib/supabase';
 import { verifyPassword, createSession } from '@/lib/auth';
 import { logActivity } from '@/lib/logger';
 
@@ -11,14 +12,30 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: 'Username/Email and Password are required' }, { status: 400 });
     }
 
-    const user = await db.user.findFirst({
-      where: {
-        OR: [
-          { username: usernameOrEmail.trim() },
-          { email: usernameOrEmail.trim().toLowerCase() },
-        ],
-      },
-    });
+    const queryVal = usernameOrEmail.trim();
+
+    let user: any = null;
+    try {
+      user = await db.user.findFirst({
+        where: {
+          OR: [
+            { username: queryVal },
+            { email: queryVal.toLowerCase() },
+          ],
+        },
+      });
+    } catch (prismaErr) {
+      console.warn('Prisma TCP query failed, executing HTTP REST failover query:', prismaErr);
+      const { data } = await supabaseAdmin
+        .from('User')
+        .select('*')
+        .or(`username.eq.${queryVal},email.eq.${queryVal.toLowerCase()}`)
+        .limit(1);
+
+      if (data && data.length > 0) {
+        user = data[0];
+      }
+    }
 
     if (!user) {
       return NextResponse.json({ error: 'Invalid credentials' }, { status: 401 });
