@@ -21,23 +21,30 @@ export async function PUT(req: NextRequest) {
 
     if (avatarUrl !== undefined && avatarUrl !== null) {
       if (typeof avatarUrl === 'string' && avatarUrl.startsWith('data:image')) {
-        // Extract base64 and save to public uploads directory
-        const matches = avatarUrl.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
-        if (matches && matches[2]) {
-          const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
-          const base64Data = matches[2];
-          const buffer = Buffer.from(base64Data, 'base64');
+        try {
+          // Extract base64 and attempt save to public uploads directory
+          const matches = avatarUrl.match(/^data:image\/([a-zA-Z0-9]+);base64,(.+)$/);
+          if (matches && matches[2]) {
+            const ext = matches[1] === 'jpeg' ? 'jpg' : matches[1];
+            const base64Data = matches[2];
+            const buffer = Buffer.from(base64Data, 'base64');
 
-          const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
-          if (!existsSync(uploadDir)) {
-            mkdirSync(uploadDir, { recursive: true });
+            const uploadDir = path.join(process.cwd(), 'public', 'uploads', 'avatars');
+            if (!existsSync(uploadDir)) {
+              mkdirSync(uploadDir, { recursive: true });
+            }
+
+            const fileName = `avatar-${currentUser.id}.${ext}`;
+            const filePath = path.join(uploadDir, fileName);
+            await fs.writeFile(filePath, buffer);
+
+            updateData.avatarUrl = `/uploads/avatars/${fileName}?v=${Date.now()}`;
+          } else {
+            updateData.avatarUrl = avatarUrl;
           }
-
-          const fileName = `avatar-${currentUser.id}.${ext}`;
-          const filePath = path.join(uploadDir, fileName);
-          await fs.writeFile(filePath, buffer);
-
-          updateData.avatarUrl = `/uploads/avatars/${fileName}?v=${Date.now()}`;
+        } catch (fsErr) {
+          console.warn('[SERVERLESS PROFILE] Read-only filesystem detected, storing Base64 Data URL directly:', fsErr);
+          updateData.avatarUrl = avatarUrl;
         }
       } else {
         updateData.avatarUrl = avatarUrl;

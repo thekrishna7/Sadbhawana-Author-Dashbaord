@@ -84,17 +84,25 @@ export async function POST(req: NextRequest) {
       return NextResponse.json({ error: `Unsupported file format '${ext}'. Allowed: ${ALLOWED_EXTENSIONS.join(', ')}` }, { status: 400 });
     }
 
-    // Save file locally to public/uploads
-    const uploadDir = path.join(process.cwd(), 'public', 'uploads');
-    await fs.mkdir(uploadDir, { recursive: true });
-
-    const timeStamp = Date.now();
-    const sanitizedFileName = `${timeStamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
-    const filePath = path.join(uploadDir, sanitizedFileName);
-    const publicUrl = `/uploads/${sanitizedFileName}`;
-
+    let publicUrl = '';
     const buffer = Buffer.from(await file.arrayBuffer());
-    await fs.writeFile(filePath, buffer);
+
+    try {
+      // Attempt local file write to public/uploads
+      const uploadDir = path.join(process.cwd(), 'public', 'uploads');
+      await fs.mkdir(uploadDir, { recursive: true });
+
+      const timeStamp = Date.now();
+      const sanitizedFileName = `${timeStamp}_${file.name.replace(/[^a-zA-Z0-9.-]/g, '_')}`;
+      const filePath = path.join(uploadDir, sanitizedFileName);
+
+      await fs.writeFile(filePath, buffer);
+      publicUrl = `/uploads/${sanitizedFileName}`;
+    } catch (fsErr) {
+      console.warn('[SERVERLESS FILES] Read-only filesystem detected, storing Data URL:', fsErr);
+      const mimeType = file.type || 'application/octet-stream';
+      publicUrl = `data:${mimeType};base64,${buffer.toString('base64')}`;
+    }
 
     // Check existing file of same type for book for version auto-increment
     const existingFile = await db.file.findFirst({
