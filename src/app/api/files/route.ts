@@ -31,27 +31,38 @@ export async function GET(req: NextRequest) {
   if (status) whereClause.status = status;
 
   if (currentUser.role === 'AUTHOR') {
-    // Author can only see files for assigned books
-    whereClause.book = {
-      assignments: {
-        some: { authorId: currentUser.id },
+    // Author can see files for assigned books OR uploaded by themselves
+    whereClause.OR = [
+      { uploaderId: currentUser.id },
+      {
+        book: {
+          assignments: {
+            some: { authorId: currentUser.id },
+          },
+        },
       },
-    };
+    ];
   }
 
-  const files = await db.file.findMany({
-    where: whereClause,
-    include: {
-      book: { select: { id: true, name: true, isbn: true } },
-      uploader: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
-      versions: { orderBy: { version: 'desc' } },
-      changeRequests: {
-        include: { user: { select: { fullName: true, role: true } } },
-        orderBy: { createdAt: 'desc' },
+  let files: any[] = [];
+  try {
+    files = await db.file.findMany({
+      where: whereClause,
+      include: {
+        book: { select: { id: true, name: true, isbn: true } },
+        uploader: { select: { id: true, fullName: true, role: true, avatarUrl: true } },
+        versions: { orderBy: { version: 'desc' } },
+        changeRequests: {
+          include: { user: { select: { fullName: true, role: true } } },
+          orderBy: { createdAt: 'desc' },
+        },
       },
-    },
-    orderBy: { createdAt: 'desc' },
-  });
+      orderBy: { createdAt: 'desc' },
+    });
+  } catch (err) {
+    console.warn('Prisma files GET failed, returning empty array:', err);
+    files = [];
+  }
 
   return NextResponse.json({ files });
 }
