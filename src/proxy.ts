@@ -4,7 +4,7 @@ import jwt from 'jsonwebtoken';
 const JWT_SECRET = process.env.JWT_SECRET || 'sadbhawana-secret-key-production-2026';
 const TOKEN_NAME = 'sadbhawana_session';
 
-export function middleware(req: NextRequest) {
+export function proxy(req: NextRequest) {
   const token = req.cookies.get(TOKEN_NAME)?.value;
   const { pathname } = req.nextUrl;
 
@@ -32,9 +32,6 @@ export function middleware(req: NextRequest) {
       const decoded = jwt.decode(token) as any;
       if (!decoded) {
         return NextResponse.redirect(new URL('/login', req.url));
-      }
-      if (decoded.role === 'ADMIN' && !pathname.startsWith('/admin')) {
-        // Admin can view author view if desired or stay in admin
       }
     } catch {
       return NextResponse.redirect(new URL('/login', req.url));
